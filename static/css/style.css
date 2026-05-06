@@ -24,10 +24,11 @@ body {
     position: relative;
 }
 
-/* LOGIN BOX */
+/* BOX */
 .login-box {
     width: 100%;
     max-width: 350px;
+    text-align: left;
 }
 
 /* TITLE */
@@ -36,16 +37,23 @@ body {
     margin-bottom: 30px;
 }
 
+/* SELAMAT DATANG */
 .welcome-text {
     font-weight: 600;
     font-size: 18px;
+    margin-bottom: 5px;
 }
 
 /* INFO */
 .info-text {
     font-size: 13px;
+    font-weight: 400;
     text-align: justify;
     margin-bottom: 25px;
+}
+
+.bold-text {
+    font-weight: 600;
 }
 
 /* INPUT */
@@ -70,20 +78,31 @@ body {
     width: 100%;
     padding: 10px;
     border-radius: 8px;
+    font-weight: 500;
 }
 
 .btn-login:hover {
     background-color: #333;
 }
 
-/* FORGOT */
+/* LUPA PASSWORD */
 .forgot-text {
     text-align: center;
     font-size: 12px;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
-/* ADMIN TOGGLE */
+.link-text {
+    font-weight: 600;
+    color: black;
+    text-decoration: none;
+}
+
+.link-text:hover {
+    text-decoration: underline;
+}
+
+/* ADMIN BAWAH KANAN */
 .admin-text {
     position: absolute;
     bottom: 20px;
@@ -91,9 +110,21 @@ body {
     font-size: 12px;
 }
 
+/* TOGGLE */
 .toggle {
     font-weight: 600;
     cursor: pointer;
+}
+
+/* TYPOGRAPHY */
+h2 {
+    font-weight: 600;
+    font-size: 32px;
+}
+
+p {
+    font-weight: 300;
+    line-height: 1.7;
 }
 
 /* RESPONSIVE */
@@ -113,4 +144,25 @@ body {
         text-align: center;
         margin-top: 20px;
     }
+}
+.link-text {
+    color: #3D3D3D !important; 
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+/* setelah diklik */
+.link-text:visited {
+    color: #3D3D3D;
+}
+
+.link-text:hover {
+    color: #000;
+    letter-spacing: 0.3px;
+}
+
+/* saat hover */
+.link-text:hover {
+    color: #000;
+    text-decoration: underline;
 }

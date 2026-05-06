@@ -1,0 +1,116 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+}
+
+/* LEFT */
+.left-section {
+    background-color: #7b97b2;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
+}
+
+/* RIGHT */
+.right-section {
+    background-color: #e5d3bd;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* LOGIN BOX */
+.login-box {
+    width: 100%;
+    max-width: 350px;
+}
+
+/* TITLE */
+#roleTitle {
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.welcome-text {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+/* INFO */
+.info-text {
+    font-size: 13px;
+    text-align: justify;
+    margin-bottom: 25px;
+}
+
+/* INPUT */
+.form-control {
+    background-color: #d8c6b2;
+    border: none;
+    border-bottom: 2px solid #333;
+    border-radius: 0;
+    font-size: 14px;
+    padding: 10px;
+}
+
+.form-control:focus {
+    box-shadow: none;
+    border-bottom: 2px solid black;
+}
+
+/* BUTTON */
+.btn-login {
+    background-color: black;
+    color: white;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.btn-login:hover {
+    background-color: #333;
+}
+
+/* FORGOT */
+.forgot-text {
+    text-align: center;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+/* ADMIN TOGGLE */
+.admin-text {
+    position: absolute;
+    bottom: 20px;
+    right: 30px;
+    font-size: 12px;
+}
+
+.toggle {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .left-section {
+        height: auto;
+        text-align: center;
+    }
+
+    .right-section {
+        height: auto;
+        padding: 40px;
+    }
+
+    .admin-text {
+        position: static;
+        text-align: center;
+        margin-top: 20px;
+    }
+}

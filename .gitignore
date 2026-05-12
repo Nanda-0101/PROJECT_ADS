@@ -11,6 +11,7 @@ __pycache__/
 # ======================
 venv/
 env/
+ads/
 
 # ======================
 # Jupyter Notebook
@@ -18,12 +19,12 @@ env/
 .ipynb_checkpoints/
 
 # ======================
-# Environment Variables (PENTING)
+# Environment Variables
 # ======================
 .env
 
 # ======================
-# Dataset (besar, jangan di-push)
+# Dataset
 # ======================
 *.csv
 *.xlsx
@@ -63,3 +64,22 @@ temp/
 # Build / cache
 # ======================
 *.cache
+build/
+dist/
+
+# ======================
+# Testing
+# ======================
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ======================
+# FastAPI / Uvicorn
+# ======================
+*.sqlite3
+
+# ======================
+# Node modules (jika ada frontend)
+# ======================
+node_modules/

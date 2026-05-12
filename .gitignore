@@ -1,85 +1,57 @@
-# ======================
 # Python
-# ======================
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# ======================
 # Virtual Environment
-# ======================
 venv/
 env/
 ads/
 
-# ======================
 # Jupyter Notebook
-# ======================
 .ipynb_checkpoints/
 
-# ======================
 # Environment Variables
-# ======================
 .env
 
-# ======================
 # Dataset
-# ======================
 *.csv
 *.xlsx
 
-# ======================
 # Machine Learning Models
-# ======================
 *.pkl
 *.h5
 *.joblib
 weights.json
 
-# ======================
 # Logs
-# ======================
 logs/
 *.log
 
-# ======================
 # OS Files
-# ======================
 .DS_Store
 Thumbs.db
 
-# ======================
 # IDE / Editor
-# ======================
 .vscode/
 .idea/
 
-# ======================
 # Temporary
-# ======================
 temp/
 
-# ======================
 # Build / cache
-# ======================
 *.cache
 build/
 dist/
 
-# ======================
 # Testing
-# ======================
 .pytest_cache/
 .coverage
 htmlcov/
 
-# ======================
 # FastAPI / Uvicorn
-# ======================
 *.sqlite3
 
-# ======================
 # Node modules (jika ada frontend)
-# ======================
 node_modules/

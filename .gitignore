@@ -53,5 +53,5 @@ htmlcov/
 # FastAPI / Uvicorn
 *.sqlite3
 
-# Node modules (jika ada frontend)
+# Node modules 
 node_modules/

@@ -192,6 +192,24 @@ function editProfil(nama, nip, email, fakultas) {
     updateProfilUI();
 }
 
+document.querySelectorAll('.nav-link, .btn-action').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetPage = this.getAttribute('data-page');
+        
+        // Sembunyikan semua halaman
+        document.querySelectorAll('main > div').forEach(div => {
+            div.classList.add('hidden');
+        });
+        
+        // Tampilkan halaman yang dipilih
+        const activePage = document.getElementById('page-' + targetPage);
+        if (activePage) {
+            activePage.classList.remove('hidden');
+        }
+    });
+});
+
 // ========== EVENT LISTENERS ==========
 document.addEventListener('DOMContentLoaded', () => {
     showPage('dashboard');

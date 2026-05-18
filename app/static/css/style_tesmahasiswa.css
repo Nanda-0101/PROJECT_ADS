@@ -37,7 +37,7 @@ body {
     align-items: center;
     color: white;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px oklch(0% 0 0 / 0.05);
     width: 100%;
 }
 .admin-info { display: flex; align-items: center; gap: 20px; }
@@ -73,8 +73,11 @@ body {
 }
 
 .question-box-wrapper {
-    background-color: var(--info-item-bg);
-    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    background-color: rgba(243, 227, 208, 0.45) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.65) !important;
+    box-shadow: 0 8px 32px 0 rgba(133, 115, 95, 0.08);
     border-radius: 12px !important;
     padding: 16px 24px !important;
     transition: all 0.25s ease-in-out;

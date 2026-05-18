@@ -1,0 +1,193 @@
+:root {
+    --primary-blue: #81A6C6;
+    --sidebar-bg: #81A6C6;
+    --main-bg: #D2C4B4;
+    --card-bg: #F3E3D0;
+    --text-dark: #333;
+    --accent-green: #22FF70;
+    --danger-red: #D20000;
+    --contact-btn-color: #557A95;
+    --contact-btn-hover: #4A6B82;
+    --contact-item-bg: rgba(255, 255, 255, 0.65);
+}
+
+body {
+    background-color: var(--main-bg);
+    color: var(--text-dark);
+    margin: 0;
+    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+    width: 280px;
+    height: 100vh;
+    background-color: var(--sidebar-bg);
+    position: fixed;
+    left: 0; top: 0;
+    padding: 2rem 1.5rem;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+}
+.sidebar-brand h2 {
+    color: white; 
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+.nav-link {
+    background-color: #F3E3D0 !important; 
+    color: #4A4A4A !important; 
+    padding: 0.8rem 1.2rem;
+    border-radius: 12px; 
+    margin-bottom: 12px; 
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    white-space: nowrap; 
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+.nav-link:hover, .nav-link.active {
+    background-color: #e5d4c1 !important;
+    color: #000000 !important;
+    font-weight: 600;
+}
+.menu-icon { width: 24px; height: 24px; color: #000000; }
+
+/* ========== MAIN LAYOUT ========== */
+.main-content {
+    margin-left: 280px;
+    padding: 2rem;
+    min-height: 100vh;
+}
+.top-nav {
+    background-color: var(--primary-blue);
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.admin-info { display: flex; align-items: center; gap: 15px; }
+.admin-avatar {
+    width: 45px; height: 45px;
+    border-radius: 50%; object-fit: cover;
+    border: 2px solid white;
+}
+.logout-btn {
+    background-color: var(--danger-red);
+    color: white; border: none;
+    padding: 0.5rem 1.5rem; border-radius: 8px;
+    font-weight: 600; transition: opacity 0.3s;
+}
+
+/* ========== KARTU PROFIL UTAMA ========== */
+.profile-card-box {
+    background-color: #ffffff !important; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+.profile-banner {
+    height: 180px; 
+    background-image: url('../assets/Gedung - Fmipa.jpg'); 
+    background-size: cover;
+    background-position: center 40%; 
+    position: relative;
+}
+.profile-banner::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+}
+.profile-avatar-large {
+    width: 120px; height: 120px;
+    border-radius: 50%; border: 4px solid white;
+    margin-top: -60px; margin-left: 20px;
+    object-fit: cover; box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    position: relative !important; z-index: 5 !important; 
+}
+
+.glass-ios {
+    background: rgba(243, 227, 208, 0.45) !important; 
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.45) !important;
+    border-radius: 20px !important; 
+}
+
+.contact-detail-item {
+    background-color: var(--contact-item-bg);
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.2s;
+}
+.contact-detail-item:hover {
+    transform: scale(1.01);
+}
+.contact-detail-item small {
+    font-size: 10.5px;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    color: #556270;
+}
+.contact-detail-item p {
+    font-size: 14.5px;
+    color: #111111;
+}
+
+.btn-contact {
+    background-color: var(--contact-btn-color);
+    color: white; 
+    border: none;
+    padding: 10px 24px; 
+    border-radius: 10px;
+    font-weight: 500; 
+    font-size: 14px;
+    transition: all 0.25s ease-in-out;
+    width: max-content !important;    
+    padding: 10px 10px !important;    
+    display: inline-flex !important;  
+}
+
+.btn-contact:hover {
+    background-color: var(--contact-btn-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(85, 122, 149, 0.3);
+}
+
+.btn-close-modal {
+    background-color: #e0d4c5;
+    color: #333;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-close-modal:hover { background-color: #d1c3b2; }
+
+.skill-badge {
+    background-color: #e2f0fd;
+    color: #426481;
+    font-weight: 500; font-size: 13px;
+    padding: 8px 18px; border-radius: 30px;
+}
+
+.text-dark-custom { color: #222222 !important; }
+.text-muted-custom { color: #666666 !important; }
+.text-secondary-custom { color: #3d3d3d !important; }
+
+.fade-in { animation: fadeInPage 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+@keyframes fadeInPage {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 992px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+}

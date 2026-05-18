@@ -6,8 +6,6 @@
     --text-dark: #333;
     --accent-green: #22FF70;
     --danger-red: #D20000;
-    
-    /* Palet warna kustom baru khusus Kontak agar nyaman dan mewah */
     --contact-btn-color: #557A95;
     --contact-btn-hover: #4A6B82;
     --contact-item-bg: rgba(255, 255, 255, 0.65);
@@ -91,7 +89,7 @@ body {
 
 /* ========== KARTU PROFIL UTAMA ========== */
 .profile-card-box {
-    background-color: #ffffff !important; /* Membuat dasar kartu berwarna putih bersih kontras */
+    background-color: #ffffff !important; 
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
 }
 .profile-banner {
@@ -113,16 +111,14 @@ body {
     position: relative !important; z-index: 5 !important; 
 }
 
-/* ========== PREMIUM DESIGN: GLASSMORPHISM iOS 26 STYLE ========== */
 .glass-ios {
-    background: rgba(243, 227, 208, 0.45) !important; /* Transparansi indah berbasis --card-bg */
+    background: rgba(243, 227, 208, 0.45) !important; 
     backdrop-filter: blur(20px) saturate(180%) !important;
     -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
     border: 1px solid rgba(255, 255, 255, 0.45) !important;
-    border-radius: 20px !important; /* iOS Rounded Corner */
+    border-radius: 20px !important; 
 }
 
-/* ========== GAYA KARTU DETAIL DI DALAM MODAL KONTAK ========== */
 .contact-detail-item {
     background-color: var(--contact-item-bg);
     padding: 14px 18px;

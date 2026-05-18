@@ -42,33 +42,42 @@
                     </a>
                 </p>
 
-                <!-- FORM -->
+                <!-- Di bagian form login, tambahkan display error -->
                 <form method="POST" action="/login">
 
-                    <!-- INPUT DINAMIS -->
-                    <input
-                        type="text"
-                        class="form-control mb-3"
-                        id="usernameInput"
-                        name="nim"
-                        placeholder="NIM"
-                        required
-                    >
+                        <!-- TAMPILAN ERROR -->
+                        {% if error %}
+                        <div class="alert alert-danger mb-3" role="alert">
+                                {{ error }}
+                        </div>
+                        {% endif %}
 
-                    <input
-                        type="password"
-                        class="form-control mb-3"
-                        name="password"
-                        placeholder="Kata sandi"
-                        required
-                    >
+                        <!-- INPUT DINAMIS -->
+                        <input
+                                type="text"
+                                class="form-control mb-3"
+                                id="usernameInput"
+                                name="nim"
+                                placeholder="NIM"
+                                required
+                        >
 
-                    <!-- ROLE -->
-                    <input type="hidden" id="roleInput" name="role" value="mahasiswa">
+                        <input
+                                type="password"
+                                class="form-control mb-3"
+                                name="password"
+                                placeholder="Kata sandi"
+                                required
+                        >
 
-                    <button type="submit" class="btn btn-login">
-                        Login
-                    </button>
+                        <!-- ROLE -->
+                        <input type="hidden" id="roleInput" name="role" value="mahasiswa">
+
+                        <button type="submit" class="btn btn-login">
+                                Login
+                        </button>
+
+                </form>
 
                 </form>
 

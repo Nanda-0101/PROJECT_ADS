@@ -7,9 +7,7 @@ const roleTitle = document.getElementById("roleTitle");
 const infoText = document.getElementById("infoText");
 const forgotLink = document.getElementById("forgotLink");
 
-// =====================
 // TOGGLE ROLE
-// =====================
 toggle.addEventListener("click", () => {
     isAdmin = !isAdmin;
 

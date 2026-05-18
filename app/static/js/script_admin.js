@@ -293,12 +293,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Logout
+    // SHOW MODAL
     document.getElementById('logoutBtn').addEventListener('click', () => {
-        if (confirm('Apakah Anda yakin ingin logout?')) {
-            alert('Anda telah logout.');
-            // Redirect ke halaman login (opsional)
-            // window.location.href = 'login.html';
-        }
+        let modal = new bootstrap.Modal(document.getElementById('logoutModal'));
+        modal.show();
+    });
+
+    // CONFIRM LOGOUT
+    document.getElementById('confirmLogoutBtn').addEventListener('click', () => {
+        window.location.href = "/logout"; 
     });
 });

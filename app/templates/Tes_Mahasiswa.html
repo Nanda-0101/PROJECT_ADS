@@ -8,6 +8,122 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style_tesmahasiswa.css">
+    <style>
+        /* Additional styles for pagination */
+        .page-indicator {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .option-wrapper {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-wrapper:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            background: #f8f9ff;
+        }
+
+        .option-wrapper.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-wrapper input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .test-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: white;
+        }
+
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .test-card .material-icons {
+            font-size: 48px;
+            color: #667eea;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner-border {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .question-box-wrapper {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .question-label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+        
+        .fade-in-question {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -25,183 +141,361 @@
         </div>
     </header>
 
-    <div class="quiz-card-box rounded-4 overflow-hidden shadow-sm">
-        <div class="quiz-body-content p-5">
-            <div class="quiz-tracker-centered text-center mb-4" id="questionTracker">
-                Soal <span class="fw-bold" id="currentNum">1</span> dari <span class="fw-bold" id="totalNum">5</span>
-            </div>
-
-            <div id="quizContainer" class="fade-in-question">
-                </div>
-
-            <div class="row align-items-center mt-5 pt-2" id="navigationRow">
-                <div class="col-4"></div>
-                <div class="col-4 d-flex justify-content-center gap-3">
-                    <button class="btn-quiz-nav" id="btnPrev" disabled>Sebelumnya</button>
-                    <button class="btn-quiz-nav" id="btnNext">Selanjutnya</button>
-                </div>
-                <div class="col-4 text-end">
-                    <button class="btn-quiz-submit" id="btnSubmit" disabled>Kirim</button>
-                </div>
+    <div id="testContainer">
+        <div class="quiz-card-box rounded-4 overflow-hidden shadow-sm">
+            <div class="quiz-body-content p-5" id="dynamicContent">
+                <!-- Content will be loaded here -->
             </div>
         </div>
     </div>
-    <script>
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-
-        const confirmBack = confirm("Apakah Anda yakin ingin keluar dari tes?");
-
-        if (confirmBack) {
-            window.location.href = "/mahasiswa/dashboard";
-        }
-    
-    });
-</script>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const questions = [
-        { id: 1, text: "Saya lebih memilih menghabiskan waktu luang sendirian atau bersama beberapa teman dekat daripada pergi ke acara sosial yang ramai." },
-        { id: 2, text: "Saat mengerjakan proyek praktikum, saya lebih menyukai perencanaan dan jadwal yang terstruktur matang sejak awal." },
-        { id: 3, text: "Dalam mengambil suatu keputusan penting, saya lebih mengandalkan analisis data objektif dan logika dibandingkan perasaan." },
-        { id: 4, text: "Saya merasa lebih berenergi dan mendapatkan ide-ide baru setelah melakukan diskusi kelompok besar bersama orang-orang baru." },
-        { id: 5, text: "Saya merasa nyaman bekerja di lingkungan yang fleksibel di mana saya bisa mengubah keputusan secara spontan kapan saja." }
-    ];
+window.answersMap = {};
+window.isInTest = false;
 
-    let currentIdx = 0;
-    let answers = new Array(questions.length).fill(null);
+// Logout handler
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    window.isInTest = false;
+    if (confirm("Apakah Anda yakin ingin keluar dari tes?")) {
+        window.location.href = "/mahasiswa/dashboard";
+    }
+});
 
-    const quizContainer = document.getElementById('quizContainer');
-    const currentNum = document.getElementById('currentNum');
-    const totalNum = document.getElementById('totalNum');
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const btnSubmit = document.getElementById('btnSubmit');
-
-    totalNum.innerText = questions.length;
-
-    function renderQuestion() {
-        const currentQ = questions[currentIdx];
-        const savedAnswer = answers[currentIdx];
-
-        quizContainer.classList.remove('fade-in-question');
-        void quizContainer.offsetWidth; 
-        quizContainer.classList.add('fade-in-question');
-
-        quizContainer.innerHTML = `
-            <div class="question-box-wrapper p-3 mb-4 shadow-sm">
-                <small class="question-label d-block mb-1">PERTANYAAN ${currentQ.id}</small>
-                <p class="mb-0 question-text fw-medium">
-                    ${currentQ.text}
-                </p>
-            </div>
-            <div class="options-group d-flex flex-column gap-3">
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'SS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="SS" class="me-3 custom-radio" ${savedAnswer === 'SS' ? 'checked' : ''}>
-                    <span class="option-text">Sangat Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'S' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="S" class="me-3 custom-radio" ${savedAnswer === 'S' ? 'checked' : ''}>
-                    <span class="option-text">Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'N' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="N" class="me-3 custom-radio" ${savedAnswer === 'N' ? 'checked' : ''}>
-                    <span class="option-text">Netral</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'TS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="TS" class="me-3 custom-radio" ${savedAnswer === 'TS' ? 'checked' : ''}>
-                    <span class="option-text">Tidak Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'STS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="STS" class="me-3 custom-radio" ${savedAnswer === 'STS' ? 'checked' : ''}>
-                    <span class="option-text">Sangat Tidak Setuju</span>
-                </label>
-            </div>
-        `;
-
-        currentNum.innerText = currentIdx + 1;
-        btnPrev.disabled = currentIdx === 0;
+// Main app
+document.addEventListener('DOMContentLoaded', async () => {
+    const dynamicContent = document.getElementById('dynamicContent');
+    
+    // Load available tests
+    await showTestSelection();
+    
+    async function showTestSelection() {
+        window.isInTest = true;
+        try {
+            const response = await fetch('/api/tes');
+            const tests = await response.json();
+            
+            if (tests.length === 0) {
+                dynamicContent.innerHTML = '<div class="alert alert-warning">Belum ada tes tersedia</div>';
+                return;
+            }
+            
+            dynamicContent.innerHTML = `
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold mb-3" style="color: #333;">Pilih Tes Kepribadian</h3>
+                    <p class="text-muted">Silakan pilih tes yang ingin Anda kerjakan</p>
+                </div>
+                <div class="row justify-content-center">
+                    ${tests.map(test => `
+                        <div class="col-md-8 mb-3">
+                            <div class="test-card p-4 text-center" onclick="selectTest(${test.id}, '${test.nama}')">
+                                <div class="mb-3">
+                                    <span class="material-icons">lightbulb</span>
+                                </div>
+                                <h5 class="fw-bold mb-2">${test.nama}</h5>
+                                <p class="text-muted mb-0">Klik untuk memulai tes</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (err) {
+            console.error("Error loading tests:", err);
+            dynamicContent.innerHTML = '<div class="alert alert-danger">Gagal memuat daftar tes</div>';
+        }
+    }
+    
+    window.selectTest = async (testId, testName) => {
+        await startTest(testId, testName);
+    };
+    
+    async function startTest(testId, testName) {
+        try {
+            const response = await fetch(`/api/tes/${testId}/soal`);
+            const questions = await response.json();
+            
+            renderTestInterface(testId, testName, questions);
+        } catch (err) {
+            console.error("Error loading questions:", err);
+            dynamicContent.innerHTML = '<div class="alert alert-danger">Gagal memuat soal tes</div>';
+        }
+    }
+    
+    function renderTestInterface(testId, testName, allQuestions) {
+        let answers = new Array(allQuestions.length).fill(null);
         
-        if (currentIdx === questions.length - 1) {
-            btnNext.disabled = true;
-            checkSubmitStatus();
-        } else {
-            btnNext.disabled = false;
-            btnSubmit.disabled = true;
-        }
-
-        const options = document.querySelectorAll('input[name="quizOption"]');
-        options.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                document.querySelectorAll('.option-wrapper').forEach(el => el.classList.remove('selected'));
-                e.target.closest('.option-wrapper').classList.add('selected');
-                answers[currentIdx] = e.target.value;
+        // Pagination: show 10 questions per page
+        const QUESTIONS_PER_PAGE = 10;
+        let currentPage = 0;
+        const totalPages = Math.ceil(allQuestions.length / QUESTIONS_PER_PAGE);
+        
+        function renderPage() {
+            const startIdx = currentPage * QUESTIONS_PER_PAGE;
+            const endIdx = Math.min(startIdx + QUESTIONS_PER_PAGE, allQuestions.length);
+            const pageQuestions = allQuestions.slice(startIdx, endIdx);
+            
+            // Build HTML for current page
+            let questionsHtml = '';
+            pageQuestions.forEach((question, idx) => {
+                const globalIdx = startIdx + idx;
+                const savedAnswer = answers[globalIdx];
                 
-                if (currentIdx === questions.length - 1) {
-                    checkSubmitStatus();
-                }
+                questionsHtml += `
+                    <div class="question-box-wrapper mb-4">
+                        <small class="question-label d-block mb-1">
+                            SOAL ${globalIdx + 1} DARI ${allQuestions.length}
+                        </small>
+                        <p class="question-text fw-medium">
+                            ${escapeHtml(question.text)}
+                        </p>
+                        <div class="options-group">
+                            ${renderOptions(globalIdx, savedAnswer, question)}
+                        </div>
+                    </div>
+                `;
             });
-        });
-    }
-
-    function checkSubmitStatus() {
-        const anySelected = document.querySelector('input[name="quizOption"]:checked') || answers[currentIdx] !== null;
-        if (currentIdx === questions.length - 1 && anySelected) {
-            btnSubmit.disabled = false;
-        } else {
-            btnSubmit.disabled = true;
+            
+            // Build navigation buttons
+            let navButtons = '';
+            if (currentPage > 0) {
+                navButtons += `<button class="btn-quiz-nav me-2" id="btnPrevPage">Sebelumnya</button>`;
+            }
+            if (currentPage < totalPages - 1) {
+                navButtons += `<button class="btn-quiz-nav" id="btnNextPage">Selanjutnya</button>`;
+            }
+            
+            dynamicContent.innerHTML = `
+                <div class="quiz-tracker-centered text-center mb-4">
+                    <strong style="color: #333;">${escapeHtml(testName)}</strong><br>
+                    <span class="page-indicator mt-2 d-inline-block">
+                        Halaman ${currentPage + 1} dari ${totalPages}
+                    </span><br>
+                    <small class="text-muted">Menampilkan soal ${startIdx + 1} - ${endIdx} dari ${allQuestions.length}</small>
+                </div>
+                
+                <div id="questionsContainer" class="fade-in-question">
+                    ${questionsHtml}
+                </div>
+                
+                <div class="row align-items-center mt-5 pt-2">
+                    <div class="col-4"></div>
+                    <div class="col-4 d-flex justify-content-center gap-3">
+                        ${currentPage > 0 ? '<button class="btn-quiz-nav" id="btnPrevPage">Sebelumnya</button>' : ''}
+                        ${currentPage < totalPages - 1 ? '<button class="btn-quiz-nav" id="btnNextPage">Selanjutnya</button>' : ''}
+                        ${currentPage === totalPages - 1 ? '<button class="btn-quiz-submit" id="btnSubmit">Kirim Tes</button>' : ''}
+                    </div>
+                    <div class="col-4 text-end">
+                        <small class="text-muted">* Jawaban akan disimpan</small>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for radio buttons
+            pageQuestions.forEach((_, idx) => {
+                const globalIdx = startIdx + idx;
+                document.querySelectorAll(`input[name="question_${globalIdx}"]`).forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        // Remove selected class from all options for this question
+                        document.querySelectorAll(`.option-wrapper-${globalIdx}`).forEach(el => {
+                            el.classList.remove('selected');
+                        });
+                        // Add selected class to parent
+                        e.target.closest(`.option-wrapper-${globalIdx}`).classList.add('selected');
+                        // Save answer
+                        answers[globalIdx] = e.target.value;
+                    });
+                });
+            });
+            
+            // Page navigation
+            if (currentPage > 0) {
+                const btnPrevPage = document.getElementById('btnPrevPage');
+                if (btnPrevPage) {
+                    btnPrevPage.addEventListener('click', () => {
+                        currentPage--;
+                        renderPage();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }
+            
+            if (currentPage < totalPages - 1) {
+                const btnNextPage = document.getElementById('btnNextPage');
+                if (btnNextPage) {
+                    btnNextPage.addEventListener('click', () => {
+                        currentPage++;
+                        renderPage();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }
+            
+            if (currentPage === totalPages - 1) {
+                const btnSubmit = document.getElementById('btnSubmit');
+                if (btnSubmit) {
+                    btnSubmit.addEventListener('click', () => {
+                        submitTest(testId, allQuestions, answers);
+                    });
+                }
+            }
         }
+        
+        renderPage();
     }
+    
+    function renderOptions(questionIndex, savedAnswer, question) {
 
-    btnNext.addEventListener('click', () => {
-        const selectedRadio = document.querySelector('input[name="quizOption"]:checked');
-        if (!selectedRadio && answers[currentIdx] === null) {
-            alert("Silakan pilih salah satu opsi jawaban sebelum melanjutkan.");
+        // GENDER (ID 1)
+        if (question.id === 1) {
+            return `
+                <div class="options-group">
+                    <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === "1" ? "selected" : ""}">
+                        <input type="radio" name="question_${questionIndex}" value="1" ${savedAnswer === "1" ? "checked" : ""}>
+                        <span>Laki-laki</span>
+                    </label>
+
+                    <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === "2" ? "selected" : ""}">
+                        <input type="radio" name="question_${questionIndex}" value="2" ${savedAnswer === "2" ? "checked" : ""}>
+                        <span>Perempuan</span>
+                    </label>
+                </div>
+            `;
+        }
+
+        // AGE (ID 2)
+        if (question.id === 2) {
+            return `
+                <div class="options-group">
+                    <input 
+                        type="number"
+                        min="15"
+                        max="60"
+                        class="form-control"
+                        placeholder="Masukkan umur Anda"
+                        value="${savedAnswer || ''}"
+                        oninput="window.answersMap[${questionIndex}] = this.value"
+                    />
+                </div>
+            `;
+        }
+
+        // LIKERT (Q3 - dst)
+        const options = [
+            { value: "SS", label: "Sangat Setuju" },
+            { value: "S", label: "Setuju" },
+            { value: "N", label: "Netral" },
+            { value: "TS", label: "Tidak Setuju" },
+            { value: "STS", label: "Sangat Tidak Setuju" }
+        ];
+
+        return options.map(opt => `
+            <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === opt.value ? 'selected' : ''}">
+                <input type="radio" name="question_${questionIndex}" value="${opt.value}"
+                    ${savedAnswer === opt.value ? 'checked' : ''}>
+                <span>${opt.label}</span>
+            </label>
+        `).join('');
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    async function submitTest(testId, allQuestions, answers) {
+        // Check if all questions are answered
+        const unanswered = answers.filter(a => a === null).length;
+        
+        if (unanswered > 0) {
+            alert(`Anda belum menjawab ${unanswered} soal. Silakan lengkapi semua jawaban terlebih dahulu.`);
             return;
         }
-
-        if (selectedRadio) { answers[currentIdx] = selectedRadio.value; }
-
-        if (currentIdx < questions.length - 1) {
-            currentIdx++;
-            renderQuestion();
-        }
-    });
-
-    btnPrev.addEventListener('click', () => {
-        if (currentIdx > 0) {
-            currentIdx--;
-            renderQuestion();
-        }
-    });
-
-    btnSubmit.addEventListener('click', () => {
-        const quizBodyContent = document.querySelector('.quiz-body-content');
         
-        quizBodyContent.innerHTML = `
-            <div class="success-screen-container text-center py-4 fade-in-question">
-                <div class="success-icon-circle mb-4">
-                    <span class="material-icons">check_circle</span>
+        // Confirmation dialog
+        if (!confirm('Apakah Anda yakin ingin mengirimkan tes? Pastikan semua jawaban sudah benar.')) {
+            return;
+        }
+        
+        // Show loading
+        dynamicContent.innerHTML = `
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status" style="width: 60px; height: 60px;">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <h3 class="success-title fw-bold mb-2">Tes Selesai!</h3>
-                <p class="success-message mx-auto mb-4">
-                    Selamat! Anda telah menyelesaikan seluruh soal tes kepribadian.<br>
-                    Hasil kuis Anda berhasil direkam ke dalam sistem.
-                </p>
-                <div class="pt-2">
-                    <a href="../DashMhs.html" class="btn-quiz-nav text-decoration-none d-inline-block shadow-sm">
-                        Kembali ke Dashboard
-                    </a>
-                </div>
+                <h5 class="mt-4 fw-bold">Sedang memproses tes...</h5>
+                <p class="text-muted">Mohon tunggu, sistem sedang menganalisis kepribadian Anda</p>
             </div>
         `;
-    });
+        
+        // Prepare payload
+        const payload = {
+		    id_tes: testId,
+		    answers: allQuestions.map((q, idx) => {
+		        let jawaban = answers[idx];
 
-    renderQuestion();
+		        if (q.id === 2) {
+		            jawaban = window.answersMap[idx];
+		        }
+
+		        return {
+		            id_soal: q.id,
+		            jawaban: jawaban
+		        };
+		    })
+		};
+        
+        try {
+            const response = await fetch("/api/tes/submit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                window.isInTest = false;
+                dynamicContent.innerHTML = `
+                    <div class="text-center p-5">
+                        <span class="material-icons" style="font-size: 60px; color: #28a745;">check_circle</span>
+                        <h3 class="mt-3 fw-bold">Tes Selesai!</h3>
+                        <h2 class="mt-3" style="color: #667eea; font-weight: 600;">${escapeHtml(result.hasil)}</h2>
+                        <a href="/mahasiswa/dashboard" class="btn-quiz-nav text-decoration-none d-inline-block mt-4">
+                            Kembali ke Dashboard
+                        </a>
+                    </div>
+                `;
+            } else {
+                throw new Error(result.message || 'Gagal submit tes');
+            }
+        } catch (err) {
+            console.error("Error submitting test:", err);
+            dynamicContent.innerHTML = `
+                <div class="text-center p-5">
+                    <span class="material-icons" style="font-size: 64px; color: #dc3545;">error</span>
+                    <h5 class="fw-bold mt-3 mb-3">Terjadi Kesalahan</h5>
+                    <p class="text-muted mb-4">Gagal memproses tes. Silakan coba lagi.</p>
+                    <button class="btn-quiz-nav" onclick="location.reload()">Coba Lagi</button>
+                </div>
+            `;
+        }
+    }
+    window.addEventListener("beforeunload", function (e) {
+        if (!window.isInTest) return;
+
+        const message = "Jawaban Anda belum tersimpan. Yakin ingin meninggalkan halaman?";
+
+        e.preventDefault();
+        e.returnValue = message;
+        return message;
+    });
 });
 </script>
+
 </body>
 </html>

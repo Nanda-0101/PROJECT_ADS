@@ -7,7 +7,18 @@ from starlette.status import HTTP_302_FOUND
 
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
+from app.models import mahasiswa
 from app.schemas.auth import LoginRequest, LoginResponse
+
+from app.models.tes import Tes
+from app.models.bank_soal import BankSoal
+from app.models.hasil_tes import HasilTes
+from app.models.detail_tes import DetailTes
+
+from app.services.huggingface_service import predict_kepribadian
+
+from datetime import datetime
+from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
@@ -189,4 +200,114 @@ def test_db(db: Session = Depends(get_db)):
         "status": "database connected",
         "mahasiswa_count": mahasiswa_count,
         "admin_count": admin_count
+    }
+
+@router.get("/api/tes")
+def get_tes(db: Session = Depends(get_db)):
+    data = db.query(Tes).all()
+
+    return [
+        {
+            "id": tes.ID_Tes,
+            "nama": tes.Nama_Tes
+        }
+        for tes in data
+    ]
+
+@router.get("/api/tes/{id_tes}/soal")
+def get_soal(id_tes: int, db: Session = Depends(get_db)):
+
+    soal = db.query(BankSoal)\
+        .filter(BankSoal.ID_Tes == id_tes)\
+        .all()
+
+    return [
+        {
+            "id": s.ID_Soal,
+            "text": s.Pertanyaan
+        }
+        for s in soal
+    ]
+
+@router.post("/api/tes/submit")
+async def submit_tes(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    body = await request.json()
+
+    id_tes = body["id_tes"]
+    answers = body["answers"]
+
+    user_id = request.cookies.get("user_id")
+
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User belum login")
+
+    user_id = int(user_id)
+
+    # SIMPAN HASIL TES
+    hasil = HasilTes(
+        ID_Mahasiswa=user_id,
+        ID_Tes=id_tes,
+        Waktu_Mulai_Tes=datetime.now(),
+        Waktu_Selesai_Tes=datetime.now()
+    )
+
+    db.add(hasil)
+    db.commit()
+    db.refresh(hasil)
+
+    mapping_jawaban = {
+        "STS": 1,
+        "TS": 2,
+        "N": 3,
+        "S": 4,
+        "SS": 5
+    }
+
+    jawaban_ml = []
+
+    for item in answers:
+        db.add(
+            DetailTes(
+                ID_Hasil=hasil.ID_Hasil,
+                ID_Soal=item["id_soal"],
+                Jawaban_Mahasiswa=item["jawaban"]
+            )
+        )
+
+        jawaban_ml.append(mapping_jawaban.get(item["jawaban"], 3))
+
+    # ambil data mahasiswa
+    mhs = db.query(Mahasiswa).filter(
+        Mahasiswa.ID_Mahasiswa == user_id
+    ).first()
+
+    if not mhs:
+        raise HTTPException(status_code=404, detail="Mahasiswa tidak ditemukan")
+
+    gender = mhs.Gender
+    age = mhs.Umur
+
+    # PREDIKSI ML
+    hasil_prediksi = predict_kepribadian(
+        gender=gender,
+        age=age,
+        jawaban=jawaban_ml
+    )
+
+    mapping = {
+        "Introvert": 1,
+        "Ekstrovert": 2,
+        "Ambivert": 3
+    }
+
+    hasil.ID_Jenis = mapping.get(hasil_prediksi, 3)
+
+    db.commit()
+
+    return {
+        "success": True,
+        "hasil": hasil_prediksi
     }

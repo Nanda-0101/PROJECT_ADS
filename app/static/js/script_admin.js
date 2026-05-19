@@ -295,19 +295,25 @@ if(formTambahMhs) {
         let password = document.getElementById('passwordBaru').value.trim();
         if (nim && nama && password) {
             tambahMahasiswa(nim, nama, password);
-            let modalElement = document.getElementById('modalTambahMahasiswa');
-            let modal = bootstrap.Modal.getInstance(modalElement);
-            if(modal) modal.hide();
-            let toastElement = document.getElementById('toastSukses');
-            if (toastElement) {
-                let toast = new bootstrap.Toast(toastElement);
-                toast.show();
+            formTambahMhs.classList.add('d-none');
+            const successBox = document.getElementById('successBox');
+            if(successBox) {
+                successBox.classList.remove('d-none');
             }
+            
             formTambahMhs.reset();
-
         } else {
             alert('Semua field harus diisi!');
         }
+    });
+}
+
+const modalTambahMhsElement = document.getElementById('modalTambahMahasiswa');
+if(modalTambahMhsElement) {
+    modalTambahMhsElement.addEventListener('hidden.bs.modal', () => {
+        if(formTambahMhs) formTambahMhs.classList.remove('d-none');
+        const successBox = document.getElementById('successBox');
+        if(successBox) successBox.classList.add('d-none');
     });
 }
 

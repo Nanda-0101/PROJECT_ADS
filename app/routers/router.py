@@ -174,6 +174,26 @@ async def admin_dashboard(request: Request):
         {"request": request}
     )
 
+@router.get("/admin/kelola-mahasiswa", response_class=HTMLResponse)
+async def admin_kelola_mahasiswa(request: Request):
+    user_role = request.cookies.get("user_role")
+    if user_role != "admin":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("admin_KelolaMahasiswa.html", {"request": request})
+
+@router.get("/admin/riwayat-tes", response_class=HTMLResponse)
+async def admin_riwayat_tes(request: Request):
+    user_role = request.cookies.get("user_role")
+    if user_role != "admin":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("admin_RiwayatTes.html", {"request": request})
+
+@router.get("/admin/profil", response_class=HTMLResponse)
+async def admin_profil(request: Request):
+    user_role = request.cookies.get("user_role")
+    if user_role != "admin":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("Profil_Admin.html", {"request": request})
 
 # TEST DATABASE
 

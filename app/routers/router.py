@@ -7,7 +7,7 @@ from starlette.status import HTTP_302_FOUND
 
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
-from app.models import mahasiswa
+from app.models.mahasiswa import Mahasiswa
 from app.schemas.auth import LoginRequest, LoginResponse
 
 from app.models.tes import Tes
@@ -266,32 +266,50 @@ async def submit_tes(
         "SS": 5
     }
 
+    # ambil gender & age dengan konversi ke int
+    gender_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 1)
+    age_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 2)
+    
+    gender = int(gender_raw) 
+    age = int(age_raw) 
+    
+    # ambil hanya Q1 - Q91
     jawaban_ml = []
-
     for item in answers:
-        db.add(
-            DetailTes(
-                ID_Hasil=hasil.ID_Hasil,
-                ID_Soal=item["id_soal"],
-                Jawaban_Mahasiswa=item["jawaban"]
+        if 3 <= item["id_soal"] <= 93:   
+            nilai = mapping_jawaban.get(item["jawaban"], 3)
+            jawaban_ml.append(nilai)
+   
+        # simpan semua ke DB sebagai 
+        if item["id_soal"] == 1 or item["id_soal"] == 2:
+            # Gender dan age simpan sebagai 
+            db.add(
+                DetailTes(
+                    ID_Hasil=hasil.ID_Hasil,
+                    ID_Soal=item["id_soal"],
+                    Jawaban_Mahasiswa=int(item["jawaban"])  
+                )
             )
+        else:
+            # Untuk Q3-Q93, simpan  (1-5)
+            nilai_int = mapping_jawaban.get(item["jawaban"], 3)
+            db.add(
+                DetailTes(
+                    ID_Hasil=hasil.ID_Hasil,
+                    ID_Soal=item["id_soal"],
+                    Jawaban_Mahasiswa=nilai_int  
+                )
+            )
+
+    # VALIDASI JUMLAH FITUR
+    if len(jawaban_ml) != 91:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Jumlah jawaban ML harus 91, sekarang {len(jawaban_ml)}"
         )
 
-        jawaban_ml.append(mapping_jawaban.get(item["jawaban"], 3))
-
-    # ambil data mahasiswa
-    mhs = db.query(Mahasiswa).filter(
-        Mahasiswa.ID_Mahasiswa == user_id
-    ).first()
-
-    if not mhs:
-        raise HTTPException(status_code=404, detail="Mahasiswa tidak ditemukan")
-
-    gender = mhs.Gender
-    age = mhs.Umur
-
     # PREDIKSI ML
-    hasil_prediksi = predict_kepribadian(
+    hasil_prediksi, probabilitas = predict_kepribadian(
         gender=gender,
         age=age,
         jawaban=jawaban_ml
@@ -309,5 +327,6 @@ async def submit_tes(
 
     return {
         "success": True,
-        "hasil": hasil_prediksi
+        "hasil": hasil_prediksi,
+        "probabilities": probabilitas
     }

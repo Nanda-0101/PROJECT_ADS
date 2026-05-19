@@ -120,10 +120,7 @@ function renderRiwayatTable() {
     
     tbody.innerHTML = '';
     riwayatTesList.forEach((item, idx) => {
-        let statusClass = '';
-        if (item.status === 'Introvert') statusClass = 'bg-secondary';
-        else if (item.status === 'Extrovert') statusClass = 'bg-success';
-        else statusClass = 'bg-warning';
+        let statusClass = item.status.toLowerCase(); 
         
         let row = `
             <tr>
@@ -133,8 +130,10 @@ function renderRiwayatTable() {
                 <td>${item.prodi}</td>
                 <td>${item.tanggal}</td>
                 <td><strong>${item.skor}</strong></td>
-                <td><span class="status-badge ${statusClass} text-white">${item.status}</span></td>
-                <td class="text-center"><button class="btn btn-sm btn-dark btn-lihat-detail" data-id="${item.id}">Detail</button></td>
+                <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                <td class="text-center">
+                    <button type="button" class="btn-detail-riwayat btn-lihat-detail" data-id="${item.id}">Detail</button>
+                </td>
             </tr>
         `;
         tbody.innerHTML += row;

@@ -123,6 +123,21 @@ async def mahasiswa_dashboard(request: Request):
         }
     )
 
+@router.get("/mahasiswa/tes", response_class=HTMLResponse)
+async def mahasiswa_tes(request: Request):
+    # Check if user is logged in as mahasiswa
+    user_role = request.cookies.get("user_role")
+    if user_role != "mahasiswa":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    
+    return templates.TemplateResponse(
+        "Tes_Mahasiswa.html",
+        {
+            "request": request,
+            "nama": request.cookies.get("user_nama", "Mahasiswa")
+        }
+    )
+
 
 @router.get("/mahasiswa/riwayat", response_class=HTMLResponse)
 async def riwayat_tes(request: Request):

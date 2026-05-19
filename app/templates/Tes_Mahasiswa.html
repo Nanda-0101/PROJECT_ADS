@@ -46,6 +46,17 @@
             </div>
         </div>
     </div>
+    <script>
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+
+        const confirmBack = confirm("Apakah Anda yakin ingin keluar dari tes?");
+
+        if (confirmBack) {
+            window.location.href = "/mahasiswa/dashboard";
+        }
+    
+    });
+</script>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

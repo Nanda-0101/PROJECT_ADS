@@ -22,7 +22,7 @@ let idMahasiswaYangAkanDihapus = null;
 document.addEventListener("DOMContentLoaded", function() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (sidebarContainer) {
-        fetch('admin_navigasi.html')
+        fetch('/api/navigasi')
             .then(response => response.text())
             .then(html => {
                 sidebarContainer.innerHTML = html;

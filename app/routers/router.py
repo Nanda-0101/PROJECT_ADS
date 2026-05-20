@@ -190,14 +190,18 @@ async def admin_kelola_mahasiswa(request: Request):
     user_role = request.cookies.get("user_role")
     if user_role != "admin":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("admin_KelolaMahasiswa.html", {"request": request})
+    
+    return templates.TemplateResponse(
+        "admin_KelolaMahasiswa.html", 
+        {"request": request}
+    )
 
 @router.get("/admin/riwayat-tes", response_class=HTMLResponse)
 async def admin_riwayat_tes(request: Request):
     user_role = request.cookies.get("user_role")
     if user_role != "admin":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("admin_RiwayatTes.html", {"request": request})
+    return templates.TemplateResponse("admin_RiwayatTesMahasiswa.html", {"request": request})
 
 @router.get("/admin/profil", response_class=HTMLResponse)
 async def admin_profil(request: Request):
@@ -206,6 +210,14 @@ async def admin_profil(request: Request):
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("Profil_Admin.html", {"request": request})
 
+# Di bagian PAGE ROUTES, tambahkan:
+
+@router.get("/api/navigasi")
+async def get_navigasi():
+    from fastapi.responses import FileResponse
+    return FileResponse("app/templates/admin_navigasi.html")
+
+    
 # TEST DATABASE
 
 @router.get("/test-db")

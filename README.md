@@ -1,1 +1,2 @@
-# nanda ganteng
+# ANDA INI KENAPA
+# 67

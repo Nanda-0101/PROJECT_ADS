@@ -1,2 +1,2 @@
 # ANDA INI KENAPA
-# SIX SEVEN
+# 67

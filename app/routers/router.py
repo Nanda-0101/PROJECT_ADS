@@ -1,6 +1,6 @@
 # app/routers/router.py
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_302_FOUND
@@ -149,7 +149,6 @@ async def mahasiswa_tes(request: Request):
         }
     )
 
-
 @router.get("/mahasiswa/riwayat", response_class=HTMLResponse)
 async def riwayat_tes(request: Request):
     user_role = request.cookies.get("user_role")
@@ -161,7 +160,6 @@ async def riwayat_tes(request: Request):
         {"request": request}
     )
 
-
 @router.get("/mahasiswa/profil", response_class=HTMLResponse)
 async def profil_mahasiswa(request: Request):
     user_role = request.cookies.get("user_role")
@@ -172,7 +170,6 @@ async def profil_mahasiswa(request: Request):
         "Profil_Mahasiswa.html",
         {"request": request}
     )
-
 
 @router.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
@@ -212,10 +209,15 @@ async def admin_profil(request: Request):
 
 # Di bagian PAGE ROUTES, tambahkan:
 
+@router.get("/api/navigasi-mahasiswa")
+async def get_navigasi_mahasiswa():
+    from fastapi.responses import FileResponse
+    return FileResponse("app/templates/Mahasiswa_Navigasi.html")
+
 @router.get("/api/navigasi")
 async def get_navigasi():
     from fastapi.responses import FileResponse
-    return FileResponse("app/templates/admin_navigasi.html")
+    return FileResponse("app/templates/admin_Navigasi.html")
 
     
 # TEST DATABASE

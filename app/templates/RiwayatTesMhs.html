@@ -11,27 +11,7 @@
 <body>
     <div class="dashboard-shell">
         <aside class="sidebar">
-            <div class="sidebar-logos">
-                <img src="../static/assets/logounud.png" alt="Logo UNUD" class="sidebar-logo">
-                <img src="../static/assets/logofmipa.png" alt="Logo FMIPA" class="sidebar-logo">
-            </div>
-            <div class="brand">SIPEKA DASHBOARD</div>
-             <a class="nav-link" href="/mahasiswa/dashboard">
-                <span class="glyphicon glyphicon-th"></span>
-                Dashboard
-            </a>
-            <a class="nav-link" href="/mahasiswa/tes">
-                <span class="glyphicon glyphicon-play-circle"></span>
-                Mulai Tes
-            </a>
-            <a class="nav-link active" href="/mahasiswa/riwayat">
-                <span class="glyphicon glyphicon-file"></span>
-                Riwayat Tes
-            </a>
-            <a class="nav-link" href="/mahasiswa/profil">
-                <span class="glyphicon glyphicon-user"></span>
-                Profil
-            </a>
+            {% include 'Mahasiswa_Navigasi.html' %}
         </aside>
 
         <main class="main-panel">

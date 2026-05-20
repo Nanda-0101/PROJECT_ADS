@@ -162,6 +162,9 @@ async def profil_mahasiswa(request: Request):
         {"request": request}
     )
 
+@router.get("/admin/admin_navigasi.html", response_class=HTMLResponse)
+async def get_admin_navigasi(request: Request):
+    return templates.TemplateResponse("admin_Navigasi.html", {"request": request})
 
 @router.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
@@ -186,7 +189,7 @@ async def admin_riwayat_tes(request: Request):
     user_role = request.cookies.get("user_role")
     if user_role != "admin":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    return templates.TemplateResponse("admin_RiwayatTes.html", {"request": request})
+    return templates.TemplateResponse("admin_RiwayatTesMahasiswa.html", {"request": request})
 
 @router.get("/admin/profil", response_class=HTMLResponse)
 async def admin_profil(request: Request):

@@ -2,25 +2,22 @@
     <div style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 15px; margin-bottom: 15px;">
         <img src="../static/assets/Logo - Unud.png" alt="Logo Udayana" style="height: 48px !important; width: auto; object-fit: contain;">
         <img src="../static/assets/Logo - Fmipa.png" alt="Logo FMIPA" style="height: 55px !important; width: auto; object-fit: contain;">
+        <link rel="stylesheet" href="../static/css/style_admin.css">
     </div>
     <h2 style="color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.2rem;">SIPEKA ADMIN</h2>
     <h2 style="color: white; font-size: 1.5rem; font-weight: 800; margin-bottom: 0.2rem;">DASHBOARD</h2>
 </div>
 <nav>
-    <a href="admin_dashboard.html" class="nav-link" data-page="dashboard">
-        <img src="../static/assets/Dashboard - Admin.png" alt="Dashboard" class="menu-icon"> 
-        Dashboard
-    </a>
-    <a href="admin_riwayattesmhs.html" class="nav-link" data-page="riwayat">
-        <img src="../static/assets/Riwayat-Test.png" alt="Riwayat" class="menu-icon">
-        Riwayat Tes Mahasiswa
-    </a>
-    <a href="admin_kelolamhs.html" class="nav-link" data-page="kelola">
-        <img src="../static/assets/Kelola-Mahasiswa.png" alt="Kelola" class="menu-icon">
-        Kelola Mahasiswa
-    </a>
-    <a href="admin_profil.html" class="nav-link" data-page="profil">
-        <img src="../static/assets/Profil - Admin.png" alt="Profil" class="menu-icon">
-        Profil
-    </a>
+    <a href="/admin/dashboard" class="sidebar-link">
+    <span class="material-icons">dashboard</span> Dashboard
+</a>
+<a href="/admin/riwayat-tes" class="sidebar-link">
+    <span class="material-icons">history</span> Riwayat Tes Mahasiswa
+</a>
+<a href="/admin/kelola-mahasiswa" class="sidebar-link">
+    <span class="material-icons">manage_accounts</span> Kelola Mahasiswa
+</a>
+<a href="/admin/profil" class="sidebar-link">
+    <span class="material-icons">account_circle</span> Profil
+</a>
 </nav>

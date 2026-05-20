@@ -35,10 +35,10 @@ body {
     box-shadow: 2px 0 10px rgba(0,0,0,0.05);
 }
 
-.sidebar-brand{
-    padding-top: 40px
-    margin-bottom: 50px
-    padding-left: 10px
+.sidebar-brand {
+    padding-top: 20px;
+    margin-bottom: 30px;
+    padding-left: 10px;
 }
 
 .sidebar-brand h2 {
@@ -48,7 +48,7 @@ body {
     margin-bottom: 0.2rem;
 }
 
-.nav-link {
+.sidebar-link {
     background-color: #F3E3D0 !important; 
     color: #4A4A4A !important; 
     padding: 0.8rem 1.2rem;
@@ -58,8 +58,6 @@ body {
     align-items: center;
     gap: 15px;
     white-space: nowrap; 
-    display: flex;
-    align-items: center;
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s;
@@ -67,14 +65,14 @@ body {
     user-select: none;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.sidebar-link:hover,
+.sidebar-link.active {
     background-color: #e5d4c1 !important;
     color: #000000 !important;
     font-weight: 600;
 }
 
-.menu-icon, .nav-link i {
+.sidebar-link .material-icons, .sidebar-link i {
     width: 24px;
     height: 24px;
     color: #000000; 

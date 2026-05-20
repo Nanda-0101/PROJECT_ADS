@@ -55,6 +55,16 @@ body {
     color: #000000 !important;
     font-weight: 600;
 }
+.sidebar {
+    width: 260px !important;
+    min-width: 260px !important; 
+    max-width: 260px !important; 
+    flex-shrink: 0 !important;   
+    box-sizing: border-box !important; 
+    background: #8ca9c4 !important; 
+    padding: 28px 20px !important;
+}
+
 .menu-icon { width: 24px; height: 24px; color: #000000; }
 
 /* ========== MAIN LAYOUT ========== */

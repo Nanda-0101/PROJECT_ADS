@@ -1,2 +1,1 @@
-# ANDA INI KENAPA
-# SIX SEVEN
+# nanda ganteng

@@ -8,6 +8,285 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="../static/css/style_tesmahasiswa.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Additional styles for pagination */
+        .page-indicator {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .option-wrapper {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-wrapper:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+            background: #f8f9ff;
+        }
+
+        .option-wrapper.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option-wrapper input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .test-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            background: white;
+        }
+
+        .test-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .test-card .material-icons {
+            font-size: 48px;
+            color: #667eea;
+        }
+        
+        .loading-container {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner-border {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .question-box-wrapper {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .question-label {
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .question-text {
+            font-size: 18px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 0;
+        }
+        
+        .fade-in-question {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        /* Age dropdown styling */
+        .age-select-wrapper {
+            margin-top: 10px;
+        }
+        
+        .age-select {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%236676E9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 20px center;
+        }
+        
+        .age-select:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .age-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .age-select option {
+            padding: 10px;
+        }
+        
+        .age-select option:hover {
+            background-color: #667eea;
+            color: white;
+        }
+
+        /* Result Card Styling */
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .result-badge {
+            display: inline-block;
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        .result-badge.introvert {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .result-badge.ekstrovert {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+        
+        .result-badge.ambivert {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+        
+        .result-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 20px 0;
+        }
+        
+        .result-title.introvert { color: #667eea; }
+        .result-title.ekstrovert { color: #f5576c; }
+        .result-title.ambivert { color: #4facfe; }
+        
+        .percentage-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 8px;
+        }
+        
+        .btn-dashboard {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-dashboard:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .chart-container {
+            margin: 20px 0;
+        }
+        
+        .chart-box {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        canvas {
+            max-height: 280px;
+            margin: 0 auto;
+        }
+        
+        .insight-text {
+            background: linear-gradient(135deg, #667eea15, #764ba215);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .insight-text p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .insight-text strong {
+            color: #667eea;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-result {
+            animation: fadeIn 0.8s ease-out;
+        }
+    </style>
 </head>
 <body>
 
@@ -25,183 +304,601 @@
         </div>
     </header>
 
-    <div class="quiz-card-box rounded-4 overflow-hidden shadow-sm">
-        <div class="quiz-body-content p-5">
-            <div class="quiz-tracker-centered text-center mb-4" id="questionTracker">
-                Soal <span class="fw-bold" id="currentNum">1</span> dari <span class="fw-bold" id="totalNum">5</span>
-            </div>
-
-            <div id="quizContainer" class="fade-in-question">
-                </div>
-
-            <div class="row align-items-center mt-5 pt-2" id="navigationRow">
-                <div class="col-4"></div>
-                <div class="col-4 d-flex justify-content-center gap-3">
-                    <button class="btn-quiz-nav" id="btnPrev" disabled>Sebelumnya</button>
-                    <button class="btn-quiz-nav" id="btnNext">Selanjutnya</button>
-                </div>
-                <div class="col-4 text-end">
-                    <button class="btn-quiz-submit" id="btnSubmit" disabled>Kirim</button>
-                </div>
+    <div id="testContainer">
+        <div class="quiz-card-box rounded-4 overflow-hidden shadow-sm">
+            <div class="quiz-body-content p-5" id="dynamicContent">
+                <!-- Content will be loaded here -->
             </div>
         </div>
     </div>
-    <script>
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-
-        const confirmBack = confirm("Apakah Anda yakin ingin keluar dari tes?");
-
-        if (confirmBack) {
-            window.location.href = "/mahasiswa/dashboard";
-        }
-    
-    });
-</script>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const questions = [
-        { id: 1, text: "Saya lebih memilih menghabiskan waktu luang sendirian atau bersama beberapa teman dekat daripada pergi ke acara sosial yang ramai." },
-        { id: 2, text: "Saat mengerjakan proyek praktikum, saya lebih menyukai perencanaan dan jadwal yang terstruktur matang sejak awal." },
-        { id: 3, text: "Dalam mengambil suatu keputusan penting, saya lebih mengandalkan analisis data objektif dan logika dibandingkan perasaan." },
-        { id: 4, text: "Saya merasa lebih berenergi dan mendapatkan ide-ide baru setelah melakukan diskusi kelompok besar bersama orang-orang baru." },
-        { id: 5, text: "Saya merasa nyaman bekerja di lingkungan yang fleksibel di mana saya bisa mengubah keputusan secara spontan kapan saja." }
-    ];
+window.answersMap = {};
+window.isInTest = false;
+window.chartInstances = {
+    bar: null,
+    pie: null,
+    radar: null
+};
 
-    let currentIdx = 0;
-    let answers = new Array(questions.length).fill(null);
+// Logout handler
+document.getElementById("logoutBtn").addEventListener("click", () => {
+    window.isInTest = false;
+    if (confirm("Apakah Anda yakin ingin keluar dari tes?")) {
+        window.location.href = "/mahasiswa/dashboard";
+    }
+});
 
-    const quizContainer = document.getElementById('quizContainer');
-    const currentNum = document.getElementById('currentNum');
-    const totalNum = document.getElementById('totalNum');
-    const btnPrev = document.getElementById('btnPrev');
-    const btnNext = document.getElementById('btnNext');
-    const btnSubmit = document.getElementById('btnSubmit');
-
-    totalNum.innerText = questions.length;
-
-    function renderQuestion() {
-        const currentQ = questions[currentIdx];
-        const savedAnswer = answers[currentIdx];
-
-        quizContainer.classList.remove('fade-in-question');
-        void quizContainer.offsetWidth; 
-        quizContainer.classList.add('fade-in-question');
-
-        quizContainer.innerHTML = `
-            <div class="question-box-wrapper p-3 mb-4 shadow-sm">
-                <small class="question-label d-block mb-1">PERTANYAAN ${currentQ.id}</small>
-                <p class="mb-0 question-text fw-medium">
-                    ${currentQ.text}
-                </p>
-            </div>
-            <div class="options-group d-flex flex-column gap-3">
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'SS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="SS" class="me-3 custom-radio" ${savedAnswer === 'SS' ? 'checked' : ''}>
-                    <span class="option-text">Sangat Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'S' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="S" class="me-3 custom-radio" ${savedAnswer === 'S' ? 'checked' : ''}>
-                    <span class="option-text">Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'N' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="N" class="me-3 custom-radio" ${savedAnswer === 'N' ? 'checked' : ''}>
-                    <span class="option-text">Netral</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'TS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="TS" class="me-3 custom-radio" ${savedAnswer === 'TS' ? 'checked' : ''}>
-                    <span class="option-text">Tidak Setuju</span>
-                </label>
-                <label class="option-wrapper p-3 d-flex align-items-center rounded-3 ${savedAnswer === 'STS' ? 'selected' : ''}">
-                    <input type="radio" name="quizOption" value="STS" class="me-3 custom-radio" ${savedAnswer === 'STS' ? 'checked' : ''}>
-                    <span class="option-text">Sangat Tidak Setuju</span>
-                </label>
-            </div>
-        `;
-
-        currentNum.innerText = currentIdx + 1;
-        btnPrev.disabled = currentIdx === 0;
-        
-        if (currentIdx === questions.length - 1) {
-            btnNext.disabled = true;
-            checkSubmitStatus();
-        } else {
-            btnNext.disabled = false;
-            btnSubmit.disabled = true;
+// Main app
+document.addEventListener('DOMContentLoaded', async () => {
+    const dynamicContent = document.getElementById('dynamicContent');
+    
+    // Load available tests
+    await showTestSelection();
+    
+    async function showTestSelection() {
+        window.isInTest = true;
+        try {
+            const response = await fetch('/api/tes');
+            const tests = await response.json();
+            
+            if (tests.length === 0) {
+                dynamicContent.innerHTML = '<div class="alert alert-warning">Belum ada tes tersedia</div>';
+                return;
+            }
+            
+            dynamicContent.innerHTML = `
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold mb-3" style="color: #333;">Pilih Tes Kepribadian</h3>
+                    <p class="text-muted">Silakan pilih tes yang ingin Anda kerjakan</p>
+                </div>
+                <div class="row justify-content-center">
+                    ${tests.map(test => `
+                        <div class="col-md-8 mb-3">
+                            <div class="test-card p-4 text-center" onclick="selectTest(${test.id}, '${test.nama}')">
+                                <div class="mb-3">
+                                    <span class="material-icons">lightbulb</span>
+                                </div>
+                                <h5 class="fw-bold mb-2">${test.nama}</h5>
+                                <p class="text-muted mb-0">Klik untuk memulai tes</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (err) {
+            console.error("Error loading tests:", err);
+            dynamicContent.innerHTML = '<div class="alert alert-danger">Gagal memuat daftar tes</div>';
         }
-
-        const options = document.querySelectorAll('input[name="quizOption"]');
-        options.forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                document.querySelectorAll('.option-wrapper').forEach(el => el.classList.remove('selected'));
-                e.target.closest('.option-wrapper').classList.add('selected');
-                answers[currentIdx] = e.target.value;
+    }
+    
+    window.selectTest = async (testId, testName) => {
+        await startTest(testId, testName);
+    };
+    
+    async function startTest(testId, testName) {
+        try {
+            const response = await fetch(`/api/tes/${testId}/soal`);
+            const questions = await response.json();
+            
+            renderTestInterface(testId, testName, questions);
+        } catch (err) {
+            console.error("Error loading questions:", err);
+            dynamicContent.innerHTML = '<div class="alert alert-danger">Gagal memuat soal tes</div>';
+        }
+    }
+    
+    function renderTestInterface(testId, testName, allQuestions) {
+        let answers = new Array(allQuestions.length).fill(null);
+        
+        // Pagination: show 10 questions per page
+        const QUESTIONS_PER_PAGE = 10;
+        let currentPage = 0;
+        const totalPages = Math.ceil(allQuestions.length / QUESTIONS_PER_PAGE);
+        
+        function renderPage() {
+            const startIdx = currentPage * QUESTIONS_PER_PAGE;
+            const endIdx = Math.min(startIdx + QUESTIONS_PER_PAGE, allQuestions.length);
+            const pageQuestions = allQuestions.slice(startIdx, endIdx);
+            
+            let questionsHtml = '';
+            pageQuestions.forEach((question, idx) => {
+                const globalIdx = startIdx + idx;
+                const savedAnswer = answers[globalIdx];
                 
-                if (currentIdx === questions.length - 1) {
-                    checkSubmitStatus();
+                questionsHtml += `
+                    <div class="question-box-wrapper mb-4">
+                        <small class="question-label d-block mb-1">
+                            SOAL ${globalIdx + 1} DARI ${allQuestions.length}
+                        </small>
+                        <p class="question-text fw-medium">
+                            ${escapeHtml(question.text)}
+                        </p>
+                        <div class="options-group">
+                            ${renderOptions(globalIdx, savedAnswer, question)}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            dynamicContent.innerHTML = `
+                <div class="quiz-tracker-centered text-center mb-4">
+                    <strong style="color: #333;">${escapeHtml(testName)}</strong><br>
+                    <span class="page-indicator mt-2 d-inline-block">
+                        Halaman ${currentPage + 1} dari ${totalPages}
+                    </span><br>
+                    <small class="text-muted">Menampilkan soal ${startIdx + 1} - ${endIdx} dari ${allQuestions.length}</small>
+                </div>
+                
+                <div id="questionsContainer" class="fade-in-question">
+                    ${questionsHtml}
+                </div>
+                
+                <div class="row align-items-center mt-5 pt-2">
+                    <div class="col-4"></div>
+                    <div class="col-4 d-flex justify-content-center gap-3">
+                        ${currentPage > 0 ? '<button class="btn-quiz-nav" id="btnPrevPage">Sebelumnya</button>' : ''}
+                        ${currentPage < totalPages - 1 ? '<button class="btn-quiz-nav" id="btnNextPage">Selanjutnya</button>' : ''}
+                        ${currentPage === totalPages - 1 ? '<button class="btn-quiz-submit" id="btnSubmit">Kirim Tes</button>' : ''}
+                    </div>
+                    <div class="col-4 text-end">
+                        <small class="text-muted">* Jawaban akan disimpan</small>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for radio buttons and select
+            pageQuestions.forEach((question, idx) => {
+                const globalIdx = startIdx + idx;
+                
+                if (question.id === 1) {
+                    document.querySelectorAll(`input[name="question_${globalIdx}"]`).forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            document.querySelectorAll(`.option-wrapper-${globalIdx}`).forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            e.target.closest(`.option-wrapper-${globalIdx}`).classList.add('selected');
+                            answers[globalIdx] = e.target.value;
+                        });
+                    });
+                }
+                
+                if (question.id === 2) {
+                    const ageSelect = document.getElementById(`age_select_${globalIdx}`);
+                    if (ageSelect) {
+                        ageSelect.addEventListener('change', (e) => {
+                            answers[globalIdx] = e.target.value;
+                        });
+                    }
+                }
+                
+                if (question.id >= 3) {
+                    document.querySelectorAll(`input[name="question_${globalIdx}"]`).forEach(radio => {
+                        radio.addEventListener('change', (e) => {
+                            document.querySelectorAll(`.option-wrapper-${globalIdx}`).forEach(el => {
+                                el.classList.remove('selected');
+                            });
+                            e.target.closest(`.option-wrapper-${globalIdx}`).classList.add('selected');
+                            answers[globalIdx] = e.target.value;
+                        });
+                    });
                 }
             });
+            
+            // Page navigation
+            if (currentPage > 0) {
+                const btnPrevPage = document.getElementById('btnPrevPage');
+                if (btnPrevPage) {
+                    btnPrevPage.addEventListener('click', () => {
+                        currentPage--;
+                        renderPage();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }
+            
+            if (currentPage < totalPages - 1) {
+                const btnNextPage = document.getElementById('btnNextPage');
+                if (btnNextPage) {
+                    btnNextPage.addEventListener('click', () => {
+                        currentPage++;
+                        renderPage();
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    });
+                }
+            }
+            
+            if (currentPage === totalPages - 1) {
+                const btnSubmit = document.getElementById('btnSubmit');
+                if (btnSubmit) {
+                    btnSubmit.addEventListener('click', () => {
+                        submitTest(testId, allQuestions, answers);
+                    });
+                }
+            }
+        }
+        
+        renderPage();
+    }
+    
+    function renderOptions(questionIndex, savedAnswer, question) {
+        if (question.id === 1) {
+            return `
+                <div class="options-group">
+                    <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === "1" ? "selected" : ""}">
+                        <input type="radio" name="question_${questionIndex}" value="1" ${savedAnswer === "1" ? "checked" : ""}>
+                        <span>Laki-laki</span>
+                    </label>
+                    <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === "2" ? "selected" : ""}">
+                        <input type="radio" name="question_${questionIndex}" value="2" ${savedAnswer === "2" ? "checked" : ""}>
+                        <span>Perempuan</span>
+                    </label>
+                </div>
+            `;
+        }
+
+        if (question.id === 2) {
+            let options = '';
+            for (let i = 10; i <= 60; i++) {
+                options += `<option value="${i}" ${savedAnswer == i ? 'selected' : ''}>${i} tahun</option>`;
+            }
+            
+            return `
+                <div class="age-select-wrapper">
+                    <select class="age-select" id="age_select_${questionIndex}" name="question_${questionIndex}">
+                        <option value="" disabled ${!savedAnswer ? 'selected' : ''}>-- Pilih Umur Anda --</option>
+                        ${options}
+                    </select>
+                </div>
+            `;
+        }
+
+        const options = [
+            { value: "SS", label: "Sangat Setuju" },
+            { value: "S", label: "Setuju" },
+            { value: "N", label: "Netral" },
+            { value: "TS", label: "Tidak Setuju" },
+            { value: "STS", label: "Sangat Tidak Setuju" }
+        ];
+
+        return options.map(opt => `
+            <label class="option-wrapper option-wrapper-${questionIndex} ${savedAnswer === opt.value ? 'selected' : ''}">
+                <input type="radio" name="question_${questionIndex}" value="${opt.value}"
+                    ${savedAnswer === opt.value ? 'checked' : ''}>
+                <span>${opt.label}</span>
+            </label>
+        `).join('');
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    function destroyAllCharts() {
+        Object.keys(window.chartInstances).forEach(key => {
+            if (window.chartInstances[key]) {
+                window.chartInstances[key].destroy();
+                window.chartInstances[key] = null;
+            }
         });
     }
-
-    function checkSubmitStatus() {
-        const anySelected = document.querySelector('input[name="quizOption"]:checked') || answers[currentIdx] !== null;
-        if (currentIdx === questions.length - 1 && anySelected) {
-            btnSubmit.disabled = false;
-        } else {
-            btnSubmit.disabled = true;
-        }
-    }
-
-    btnNext.addEventListener('click', () => {
-        const selectedRadio = document.querySelector('input[name="quizOption"]:checked');
-        if (!selectedRadio && answers[currentIdx] === null) {
-            alert("Silakan pilih salah satu opsi jawaban sebelum melanjutkan.");
-            return;
-        }
-
-        if (selectedRadio) { answers[currentIdx] = selectedRadio.value; }
-
-        if (currentIdx < questions.length - 1) {
-            currentIdx++;
-            renderQuestion();
-        }
-    });
-
-    btnPrev.addEventListener('click', () => {
-        if (currentIdx > 0) {
-            currentIdx--;
-            renderQuestion();
-        }
-    });
-
-    btnSubmit.addEventListener('click', () => {
-        const quizBodyContent = document.querySelector('.quiz-body-content');
+    
+    function showResultWithChart(result, probabilities) {
+        const resultClass = result.toLowerCase();
+        let badgeClass = '';
+        if (resultClass === 'introvert') badgeClass = 'introvert';
+        else if (resultClass === 'ekstrovert') badgeClass = 'ekstrovert';
+        else badgeClass = 'ambivert';
         
-        quizBodyContent.innerHTML = `
-            <div class="success-screen-container text-center py-4 fade-in-question">
-                <div class="success-icon-circle mb-4">
-                    <span class="material-icons">check_circle</span>
+        const introvertPercent = (probabilities.Introvert * 100).toFixed(1);
+        const ekstrovertPercent = (probabilities.Ekstrovert * 100).toFixed(1);
+        const ambivertPercent = (probabilities.Ambivert * 100).toFixed(1);
+        
+        // Generate insight text based on dominant personality
+        let insightText = '';
+        if (resultClass === 'introvert') {
+            insightText = `Anda cenderung <strong>Introvert</strong>, yang berarti Anda lebih nyaman dengan lingkungan yang tenang, suka merenung, dan mendapatkan energi dari waktu sendiri. Anda memiliki kemampuan analisis yang baik dan cenderung berpikir sebelum berbicara atau bertindak.`;
+        } else if (resultClass === 'ekstrovert') {
+            insightText = `Anda cenderung <strong>Ekstrovert</strong>, yang berarti Anda energik, suka bersosialisasi, dan mendapatkan energi dari interaksi dengan orang lain. Anda cenderung terbuka, ekspresif, dan menikmati menjadi pusat perhatian dalam situasi sosial.`;
+        } else {
+            insightText = `Anda cenderung <strong>Ambivert</strong>, yang berarti Anda memiliki keseimbangan antara sifat introvert dan ekstrovert. Anda bisa menyesuaikan diri dengan berbagai situasi sosial, nyaman baik sendiri maupun bersama orang lain, dan memiliki fleksibilitas dalam berinteraksi.`;
+        }
+        
+        dynamicContent.innerHTML = `
+            <div class="result-card animate-result text-center">
+                <div class="result-badge ${badgeClass}">HASIL PREDIKSI KEPRIBADIAN</div>
+                <div class="result-title ${resultClass}">${result}</div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="chart-box">
+                            <div class="chart-title">Distribusi Kepribadian</div>
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-box">
+                            <div class="chart-title">Perbandingan Skor</div>
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="chart-box">
+                            <div class="chart-title">Tingkat Kecenderungan</div>
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="success-title fw-bold mb-2">Tes Selesai!</h3>
-                <p class="success-message mx-auto mb-4">
-                    Selamat! Anda telah menyelesaikan seluruh soal tes kepribadian.<br>
-                    Hasil kuis Anda berhasil direkam ke dalam sistem.
-                </p>
-                <div class="pt-2">
-                    <a href="../DashMhs.html" class="btn-quiz-nav text-decoration-none d-inline-block shadow-sm">
-                        Kembali ke Dashboard
-                    </a>
+                
+                <div class="insight-text">
+                    <p><strong>📊 Analisis Kepribadian:</strong> ${insightText}</p>
+                    <p class="mt-2"><strong>📈 Detail Persentase:</strong> Introvert ${introvertPercent}% | Ekstrovert ${ekstrovertPercent}% | Ambivert ${ambivertPercent}%</p>
                 </div>
+                
+                <a href="/mahasiswa/dashboard" class="btn-dashboard mt-3">
+                    <i class="material-icons" style="font-size: 18px; vertical-align: middle;">dashboard</i>
+                    Kembali ke Dashboard
+                </a>
             </div>
         `;
+        
+        destroyAllCharts();
+        
+        // Colors for charts
+        const colors = {
+            Introvert: '#667eea',
+            Ekstrovert: '#f5576c',
+            Ambivert: '#4facfe'
+        };
+        
+        const dataValues = [
+            probabilities.Introvert * 100,
+            probabilities.Ekstrovert * 100,
+            probabilities.Ambivert * 100
+        ];
+        
+        // 1. PIE CHART
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        window.chartInstances.pie = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Introvert', 'Ekstrovert', 'Ambivert'],
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: [colors.Introvert, colors.Ekstrovert, colors.Ambivert],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11, family: 'Poppins' },
+                            padding: 10,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}%`;
+                            }
+                        },
+                        backgroundColor: 'rgba(0,0,0,0.8)',
+                        titleColor: 'white',
+                        bodyColor: 'white'
+                    }
+                }
+            }
+        });
+        
+        // 2. RADAR CHART
+        const radarCtx = document.getElementById('radarChart').getContext('2d');
+        window.chartInstances.radar = new Chart(radarCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Introvert', 'Ekstrovert', 'Ambivert'],
+                datasets: [{
+                    label: 'Skor Kepribadian',
+                    data: dataValues,
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)',
+                    borderColor: '#667eea',
+                    borderWidth: 2,
+                    pointBackgroundColor: [colors.Introvert, colors.Ekstrovert, colors.Ambivert],
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20,
+                            backdropColor: 'transparent',
+                            font: { size: 10 }
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        angleLines: {
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 3. BAR CHART (without grid lines)
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        window.chartInstances.bar = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Introvert', 'Ekstrovert', 'Ambivert'],
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: [colors.Introvert, colors.Ekstrovert, colors.Ambivert],
+                    borderWidth: 0,
+                    borderRadius: 10,
+                    barPercentage: 0.7,
+                    categoryPercentage: 0.9
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw.toFixed(1)}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: {
+                            display: false,  // Hapus garis grid horizontal
+                            drawBorder: true
+                        },
+                        ticks: {
+                            stepSize: 20,
+                            font: { size: 10 }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Persentase (%)',
+                            font: { size: 10 }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false  // Hapus garis grid vertikal
+                        },
+                        ticks: {
+                            font: { size: 10, weight: 'bold' }
+                        }
+                    }
+                },
+                layout: {
+                    padding: {
+                        top: 10,
+                        bottom: 10
+                    }
+                }
+            }
+        });
+    }
+    
+    async function submitTest(testId, allQuestions, answers) {
+        const unanswered = answers.filter(a => a === null || a === "").length;
+        
+        if (unanswered > 0) {
+            alert(`Anda belum menjawab ${unanswered} soal. Silakan lengkapi semua jawaban terlebih dahulu.`);
+            return;
+        }
+        
+        if (!confirm('Apakah Anda yakin ingin mengirimkan tes? Pastikan semua jawaban sudah benar.')) {
+            return;
+        }
+        
+        dynamicContent.innerHTML = `
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status" style="width: 60px; height: 60px;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5 class="mt-4 fw-bold">Sedang memproses tes...</h5>
+                <p class="text-muted">Mohon tunggu, sistem sedang menganalisis kepribadian Anda</p>
+            </div>
+        `;
+        
+        const payload = {
+            id_tes: testId,
+            answers: allQuestions.map((q, idx) => {
+                let jawaban = answers[idx];
+                if (q.id === 1 || q.id === 2) {
+                    jawaban = parseInt(jawaban);
+                }
+                return {
+                    id_soal: q.id,
+                    jawaban: jawaban
+                };
+            })
+        };
+        
+        try {
+            const response = await fetch("/api/tes/submit", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                window.isInTest = false;
+                showResultWithChart(result.hasil, result.probabilities);
+            } else {
+                throw new Error(result.message || 'Gagal submit tes');
+            }
+        } catch (err) {
+            console.error("Error submitting test:", err);
+            dynamicContent.innerHTML = `
+                <div class="text-center p-5">
+                    <span class="material-icons" style="font-size: 64px; color: #dc3545;">error</span>
+                    <h5 class="fw-bold mt-3 mb-3">Terjadi Kesalahan</h5>
+                    <p class="text-muted mb-4">Gagal memproses tes. Silakan coba lagi.</p>
+                    <button class="btn-quiz-nav" onclick="location.reload()">Coba Lagi</button>
+                </div>
+            `;
+        }
+    }
+    
+    window.addEventListener("beforeunload", function (e) {
+        if (!window.isInTest) return;
+        const message = "Jawaban Anda belum tersimpan. Yakin ingin meninggalkan halaman?";
+        e.preventDefault();
+        e.returnValue = message;
+        return message;
     });
-
-    renderQuestion();
 });
 </script>
+
 </body>
 </html>

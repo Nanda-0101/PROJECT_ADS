@@ -207,8 +207,6 @@ async def admin_profil(request: Request):
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     return templates.TemplateResponse("Profil_Admin.html", {"request": request})
 
-# Di bagian PAGE ROUTES, tambahkan:
-
 @router.get("/api/navigasi-mahasiswa")
 async def get_navigasi_mahasiswa():
     from fastapi.responses import FileResponse

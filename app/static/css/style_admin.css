@@ -115,21 +115,6 @@ body {
     border: 2px solid white;
 }
 
-.logout-btn {
-    background-color: var(--danger-red);
-    color: white;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: opacity 0.3s;
-}
-
-.logout-btn:hover {
-    opacity: 0.9;
-    color: white;
-}
-
 /* DASHBOARD CARDS */
 .dashboard-card {
     background-color: var(--card-bg);

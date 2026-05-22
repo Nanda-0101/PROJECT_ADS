@@ -42,3 +42,8 @@ htmlcov/
 
 # Node modules 
 node_modules/
+
+# JUPYTER NOTEBOOK
+.ipynb_checkpoints/
+.virtual_documents/
+hf_model_new/

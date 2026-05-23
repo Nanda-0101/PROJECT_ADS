@@ -15,6 +15,9 @@ from app.models.bank_soal import BankSoal
 from app.models.hasil_tes import HasilTes
 from app.models.detail_tes import DetailTes
 from app.schemas.auth import LoginRequest, LoginResponse
+from app.services.huggingface_service import predict_kepribadian
+
+from datetime import datetime
 
 router = APIRouter()
 
@@ -396,4 +399,133 @@ def test_db(db: Session = Depends(get_db)):
         "status": "database connected",
         "mahasiswa_count": mahasiswa_count,
         "admin_count": admin_count
+    }
+
+@router.get("/api/tes")
+def get_tes(db: Session = Depends(get_db)):
+    data = db.query(Tes).all()
+
+    return [
+        {
+            "id": tes.ID_Tes,
+            "nama": tes.Nama_Tes
+        }
+        for tes in data
+    ]
+
+@router.get("/api/tes/{id_tes}/soal")
+def get_soal(id_tes: int, db: Session = Depends(get_db)):
+
+    soal = db.query(BankSoal)\
+        .filter(BankSoal.ID_Tes == id_tes)\
+        .all()
+
+    return [
+        {
+            "id": s.ID_Soal,
+            "text": s.Pertanyaan
+        }
+        for s in soal
+    ]
+
+@router.post("/api/tes/submit")
+async def submit_tes(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    body = await request.json()
+
+    id_tes = body["id_tes"]
+    answers = body["answers"]
+
+    user_id = request.cookies.get("user_id")
+
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User belum login")
+
+    user_id = int(user_id)
+
+    # SIMPAN HASIL TES
+    hasil = HasilTes(
+        ID_Mahasiswa=user_id,
+        ID_Tes=id_tes,
+        Waktu_Mulai_Tes=datetime.now(),
+        Waktu_Selesai_Tes=datetime.now()
+    )
+
+    db.add(hasil)
+    db.commit()
+    db.refresh(hasil)
+
+    mapping_jawaban = {
+        "STS": 1,
+        "TS": 2,
+        "N": 3,
+        "S": 4,
+        "SS": 5
+    }
+
+    # ambil gender & age dengan konversi ke int
+    gender_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 1)
+    age_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 2)
+    
+    gender = int(gender_raw) 
+    age = int(age_raw) 
+    
+    # ambil hanya Q1 - Q91
+    jawaban_ml = []
+    for item in answers:
+        if 3 <= item["id_soal"] <= 93:   
+            nilai = mapping_jawaban.get(item["jawaban"], 3)
+            jawaban_ml.append(nilai)
+   
+        # simpan semua ke DB sebagai 
+        if item["id_soal"] == 1 or item["id_soal"] == 2:
+            # Gender dan age simpan sebagai 
+            db.add(
+                DetailTes(
+                    ID_Hasil=hasil.ID_Hasil,
+                    ID_Soal=item["id_soal"],
+                    Jawaban_Mahasiswa=int(item["jawaban"])  
+                )
+            )
+        else:
+            # Untuk Q3-Q93, simpan  (1-5)
+            nilai_int = mapping_jawaban.get(item["jawaban"], 3)
+            db.add(
+                DetailTes(
+                    ID_Hasil=hasil.ID_Hasil,
+                    ID_Soal=item["id_soal"],
+                    Jawaban_Mahasiswa=nilai_int  
+                )
+            )
+
+    # VALIDASI JUMLAH FITUR
+    if len(jawaban_ml) != 91:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Jumlah jawaban ML harus 91, sekarang {len(jawaban_ml)}"
+        )
+
+    # PREDIKSI ML
+    hasil_prediksi, probabilitas = predict_kepribadian(
+        gender=gender,
+        age=age,
+        jawaban=jawaban_ml
+    )
+
+    mapping = {
+        "Introvert": 1,
+        "Ekstrovert": 2,
+        "Ambivert": 3
+    }
+
+    hasil.ID_Jenis = mapping.get(hasil_prediksi, 3)
+
+    db.commit()
+
+    return {
+        "success": True,
+        "hasil": hasil_prediksi,
+        "probabilities": probabilitas
     }

@@ -1,3 +1,65 @@
+const requiredIds = [
+    'page-dashboard', 'page-riwayat', 'page-kelola', 'page-profil', 
+    'statTotalMahasiswa', 'statTotalTes', 'statTipeDominan', 
+    'kelolaTable', 'riwayatTable', 'btnTambahMahasiswa', 
+    'formTambahMahasiswa', 'nimBaru', 'namaBaru', 'passwordBaru', 
+    'detailTesBody', 'editProfilBtn', 'formEditProfil', 
+    'editNama', 'editUsername', 'editEmail', 'editFakultas', 'editNip',
+    'ubahSandiBtn', 'profilNama', 'profilNip', 'profilEmail', 'profilFakultas',
+    'logoutBtn', 'confirmLogoutBtn', 'headerNip', 'modalEditProfil', 'modalTambahMahasiswa', 'modalDetailTes', 'logoutModal'
+];
+
+requiredIds.forEach(id => {
+    if (!document.getElementById(id)) {
+        let dummyEl = document.createElement('div');
+        dummyEl.id = id;
+        dummyEl.style.display = 'none';
+        document.body.appendChild(dummyEl);
+    }
+});
+
+let idMahasiswaYangAkanDihapus = null;
+document.addEventListener("DOMContentLoaded", function() {
+    const sidebarContainer = document.getElementById('sidebar-container');
+    if (sidebarContainer) {
+        fetch('/api/navigasi')
+            .then(response => response.text())
+            .then(html => {
+                sidebarContainer.innerHTML = html;
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.stopImmediatePropagation();
+                        window.location.href = this.getAttribute('href');
+                    });
+                });
+            })
+            .catch(err => console.error('Gagal memuat sidebar:', err));
+    }
+
+    function TampilkanHalamanJikaAsli(pageId) {
+        let p = document.getElementById(pageId);
+        if (p) {
+            const apakahDummy = p.parentElement === document.body;
+            if (!apakahDummy) {
+                p.classList.remove('hidden');
+                p.style.display = 'block';
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (TampilkanHalamanJikaAsli('page-profil')) {
+        console.log('Halaman Profil Aktif');
+    } else if (TampilkanHalamanJikaAsli('page-dashboard')) {
+        console.log('Halaman Dashboard Aktif');
+    } else if (TampilkanHalamanJikaAsli('page-riwayat')) {
+        console.log('Halaman Riwayat Aktif');
+    } else if (TampilkanHalamanJikaAsli('page-kelola')) {
+        console.log('Halaman Kelola Aktif');
+    }
+});
+
 // ========== DATA DUMMY ==========
 let mahasiswaList = [
     { id: 1, nim: "2508561140", nama: "Anak Agung Nanda Aditya", prodi: "Informatika", password: "pass123" },

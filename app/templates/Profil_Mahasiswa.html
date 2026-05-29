@@ -2,390 +2,245 @@
 <html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIPEKA Dashboard - Profil Mahasiswa</title>
 
-    <!-- BOOTSTRAP -->
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- GOOGLE FONT -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- MATERIAL ICON -->
-    <link
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- CSS -->
-    <link
-        rel="stylesheet"
-        href="../static/css/style_profilmahasiswa.css">
-
+    <link rel="stylesheet" href="../static/css/style_profilmahasiswa.css">
 </head>
 
 <body>
 
-    <!-- MODAL LOGOUT -->
-    <div class="modal fade"
-         id="logoutModal"
-         tabindex="-1"
-         aria-hidden="true">
-
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-
             <div class="modal-content">
-
                 <div class="modal-header">
-
-                    <h5 class="modal-title">
-                        Konfirmasi Logout
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-
+                    <h5 class="modal-title">Konfirmasi Logout</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
-
                     Apakah Anda yakin ingin logout?
-
                 </div>
-
                 <div class="modal-footer">
-
-                    <button type="button"
-                            class="btn btn-secondary"
-                            data-bs-dismiss="modal">
-
-                        Cancel
-
-                    </button>
-
-                    <button type="button"
-                            class="btn btn-danger"
-                            id="confirmLogoutBtn">
-
-                        Logout
-
-                    </button>
-
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmLogoutBtn">Logout</button>
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-    <!-- SIDEBAR -->
     <aside class="sidebar">
-
         {% include 'Mahasiswa_Navigasi.html' %}
-
     </aside>
 
-    <!-- MAIN CONTENT -->
     <main class="main-content fade-in">
 
-        <!-- TOP NAV -->
         <header class="top-nav">
-
             <div class="admin-info">
-
-                <img src="../static/assets/garlan.jpg"
-                     alt="Mahasiswa"
-                     class="admin-avatar">
-
+                <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="admin-avatar">
                 <div>
-
-                    <h6 class="mb-0 fw-medium">
-                        Selamat datang, Garland Bramanda!
-                    </h6>
-
-                    <small>
-                        NIM 2408561131
-                    </small>
-
+                    <h6 class="mb-0 fw-medium">Selamat datang, {{ mahasiswa.Nama_Mahasiswa }}!</h6>
+                    <small>NIM {{ mahasiswa.NIM }}</small>
                 </div>
-
             </div>
-
-            <!-- BUTTON LOGOUT -->
             <div>
-
-                <button class="logout-btn"
-                        id="logoutBtn">
-
-                    Logout
-
-                </button>
-
+                <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
-
         </header>
 
-        <!-- PROFILE CARD -->
-        <div class="profile-card-box rounded-4 overflow-hidden shadow-sm">
+        {% if msg_success %}
+        <div class="alert alert-success alert-dismissible fade show mx-4 mt-3" role="alert">
+            <i class="material-icons align-middle me-2" style="font-size: 20px;">check_circle</i> {{ msg_success }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+        
+        {% if msg_error %}
+        <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
+            <i class="material-icons align-middle me-2" style="font-size: 20px;">error</i> {{ msg_error }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
 
+        <div class="profile-card-box rounded-4 overflow-hidden shadow-sm mx-4 mt-3">
             <div class="profile-banner"></div>
 
-            <div class="d-flex justify-content-between align-items-start px-4 position-relative"
-                 style="margin-bottom: 10px;">
-
-                <img src="../static/assets/garlan.jpg"
-                     alt="Mahasiswa"
-                     class="profile-avatar-large">
-
+            <div class="d-flex justify-content-between align-items-start px-4 position-relative" style="margin-bottom: 10px;">
+                <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="profile-avatar-large">
+                
                 <button class="btn-contact mt-3 shadow-sm d-inline-flex align-items-center justify-content-center"
-                        data-bs-toggle="modal"
-                        data-bs-target="#contactModal">
-
-                    <span class="material-icons align-middle me-2"
-                          style="font-size:18px">
-                    </span>
-
+                        data-bs-toggle="modal" data-bs-target="#editProfilModal">
+                    <span class="material-icons align-middle me-2" style="font-size:18px">edit</span>
                     Edit Informasi Akun Pengguna
-
                 </button>
-
             </div>
 
             <div class="p-4 pt-2">
-
-                <h3 class="fw-semibold mb-0 text-dark-custom">
-                    Garland Bramanda
-                </h3>
-
+                <h3 class="fw-semibold mb-0 text-dark-custom">{{ mahasiswa.Nama_Mahasiswa }}</h3>
                 <p class="text-muted-custom mb-4">
                     Mahasiswa Fakultas Matematika dan Ilmu Pengetahuan Alam
                 </p>
 
                 <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR INDUK MAHASISWA (NIM)</small>
+                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.NIM }}</span>
+                    </div>
 
                     <div class="col-md-6 mb-4">
+                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">EMAIL</small>
+                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Email if mahasiswa.Email else '-' }}</span>
+                    </div>
 
-                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">
+                    <div class="col-md-6 mb-4">
+                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR TELEPON</small>
+                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Nomor_Telepon if mahasiswa.Nomor_Telepon else '-' }}</span>
+                    </div>
 
-                            NOMOR INDUK MAHASISWA (NIM)
-
-                        </small>
-
-                        <span class="fw-semibold text-dark-custom">
-                            2408561131
-                        </span>
-
+                    <div class="col-md-6 mb-4">
+                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">ALAMAT</small>
+                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Alamat if mahasiswa.Alamat else '-' }}</span>
                     </div>
 
                     <div class="col-12 mb-4">
-
                         <div class="p-4 glass-ios section-bio">
-
                             <h6 class="fw-semibold mb-2 d-flex align-items-center gap-2 text-dark-custom">
-
-                                <span class="material-icons"
-                                      style="font-size: 18px;">
-
-                                    info
-
-                                </span>
-
+                                <span class="material-icons" style="font-size: 18px;">info</span>
                                 Deskripsi
-
                             </h6>
-
-                            <p class="mb-0 text-secondary-custom"
-                               style="font-size: 14px; line-height: 1.6;">
-
-                                Mahasiswa Informatika yang berfokus pada administrasi sistem,
-                                manajemen infrastruktur jaringan, dan optimalisasi sistem operasi
-                                berbasis Linux. Gemar mengonfigurasi interkonektivitas perangkat
-                                dan layanan server jarak jauh (remote desktop).
-
+                            <p class="mb-0 text-secondary-custom" style="font-size: 14px; line-height: 1.6; white-space: pre-line;">
+                                {{ mahasiswa.Deskripsi if mahasiswa.Deskripsi else 'Belum ada deskripsi biodata. Silakan tambahkan melalui tombol edit.' }}
                             </p>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </main>
 
-    <!-- MODAL DETAIL USER -->
-    <div class="modal fade"
-         id="contactModal"
-         tabindex="-1"
-         aria-hidden="true">
-
-        <div class="modal-dialog modal-dialog-centered">
-
+    <div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content glass-ios border-0 shadow-lg">
-
-                <div class="modal-header border-0 pb-0">
-
-                    <h5 class="modal-title fw-semibold text-dark-custom d-flex align-items-center gap-2">
-
-                        <span class="material-icons text-primary-blue"
-                              style="font-size: 22px;">
-
-                            contact_page
-
-                        </span>
-
-                        Detail Pengguna
-
-                    </h5>
-
-                    <button type="button"
-                            class="btn-close"
-                            data-bs-dismiss="modal">
-                    </button>
-
-                </div>
-
-                <div class="modal-body py-4 text-dark-custom">
-
-                    <div class="contact-detail-item mb-3 shadow-sm">
-
-                        <small class="d-block mb-1">
-                            NAMA LENGKAP
-                        </small>
-
-                        <p class="fw-medium mb-0">
-                            I Nyoman Gede Garland Bramanda
-                        </p>
-
+                
+                <form action="/mahasiswa/profil/update" method="POST">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-semibold text-dark-custom d-flex align-items-center gap-2">
+                            <span class="material-icons text-primary-blue" style="font-size: 22px;">manage_accounts</span>
+                            Edit Informasi Akun & Biodata
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
-                    <div class="contact-detail-item mb-3 shadow-sm">
+                    <div class="modal-body py-4 text-dark-custom">
+                        <div class="row">
+                            <div class="col-md-6 border-end">
+                                <h6 class="fw-semibold mb-3 text-primary-blue">Ubah Biodata</h6>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">NAMA LENGKAP</label>
+                                    <input type="text" class="form-control rounded-3" name="nama" 
+                                           value="{{ mahasiswa.Nama_Mahasiswa }}" required>
+                                </div>
 
-                        <small class="d-block mb-1">
-                            Alamat
-                        </small>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">EMAIL</label>
+                                    <input type="email" class="form-control rounded-3" name="email" 
+                                           value="{{ mahasiswa.Email if mahasiswa.Email else '' }}">
+                                </div>
 
-                        <p class="fw-medium mb-0">
-                            Denpasar, Bali
-                        </p>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">NOMOR TELEPON</label>
+                                    <input type="text" class="form-control rounded-3" name="telepon" 
+                                           value="{{ mahasiswa.Nomor_Telepon if mahasiswa.Nomor_Telepon else '' }}">
+                                </div>
 
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">ALAMAT</label>
+                                    <input type="text" class="form-control rounded-3" name="alamat" 
+                                           value="{{ mahasiswa.Alamat if mahasiswa.Alamat else '' }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">DESKRIPSI BIODATA</label>
+                                    <textarea class="form-control rounded-3" name="deskripsi" rows="3">{{ mahasiswa.Deskripsi if mahasiswa.Deskripsi else '' }}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <h6 class="fw-semibold mb-3 text-danger">Ganti Password (Opsional)</h6>
+                                <p class="text-muted mb-3" style="font-size: 12px;">Kosongkan area di bawah ini jika Anda tidak ingin merubah password saat ini.</p>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">PASSWORD BARU</label>
+                                    <input type="password" class="form-control rounded-3" name="password_baru" placeholder="Masukkan password baru">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">KONFIRMASI PASSWORD BARU</label>
+                                    <input type="password" class="form-control rounded-3" id="confirm_password" placeholder="Ulangi password baru">
+                                    <div class="invalid-feedback">Konfirmasi password tidak cocok!</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="contact-detail-item mb-3 shadow-sm">
-
-                        <small class="d-block mb-1">
-                            NOMOR TELEPON
-                        </small>
-
-                        <p class="fw-medium mb-0">
-                            +62 812-3456-7890
-                        </p>
-
+                    <div class="modal-footer border-0 pt-0 justify-content-end">
+                        <button type="button" class="btn btn-secondary px-4 rounded-pill shadow-sm" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary px-4 rounded-pill shadow-sm bg-primary-blue border-0" id="saveProfilBtn">Simpan Perubahan</button>
                     </div>
-
-                    <div class="contact-detail-item shadow-sm">
-
-                        <small class="d-block mb-1">
-                            EMAIL
-                        </small>
-
-                        <p class="fw-medium mb-0 text-break">
-                            garlandbramanda@student.unud.ac.id
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <div class="modal-footer border-0 pt-0 justify-content-center">
-
-                    <button type="button"
-                            class="btn btn-close-modal px-4 rounded-pill shadow-sm"
-                            data-bs-dismiss="modal">
-
-                        Tutup
-
-                    </button>
-
-                </div>
+                </form>
 
             </div>
-
         </div>
-
     </div>
 
-    <!-- BOOTSTRAP JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- SCRIPT LOGOUT -->
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Handler Modal Logout
+            const logoutBtn = document.getElementById("logoutBtn");
+            const confirmLogoutBtn = document.getElementById("confirmLogoutBtn");
+            const logoutModalEl = document.getElementById("logoutModal");
+            const logoutModal = new bootstrap.Modal(logoutModalEl);
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                console.log("JS Loaded");
-
-                // ambil element
-                const logoutBtn =
-                    document.getElementById("logoutBtn");
-
-                const confirmLogoutBtn =
-                    document.getElementById("confirmLogoutBtn");
-
-                const logoutModalEl =
-                    document.getElementById("logoutModal");
-
-                // debug
-                console.log(logoutBtn);
-                console.log(logoutModalEl);
-
-                // inisialisasi modal
-                const logoutModal =
-                    new bootstrap.Modal(logoutModalEl);
-
-                // klik logout
-                logoutBtn.addEventListener(
-                    "click",
-                    function () {
-
-                        console.log("Logout clicked");
-
-                        logoutModal.show();
-
-                    }
-                );
-
-                // konfirmasi logout
-                confirmLogoutBtn.addEventListener(
-                    "click",
-                    function () {
-
-                        window.location.href = "/logout";
-
-                    }
-                );
-
+            if (logoutBtn) {
+                logoutBtn.addEventListener("click", function () {
+                    logoutModal.show();
+                });
             }
-        );
 
+            if (confirmLogoutBtn) {
+                confirmLogoutBtn.addEventListener("click", function () {
+                    window.location.href = "/logout";
+                });
+            }
+
+            // Validasi Kecocokan Password Sebelum Form Dikirim
+            const form = document.querySelector('form[action="/mahasiswa/profil/update"]');
+            const passwordBaru = document.querySelector('input[name="password_baru"]');
+            const confirmPassword = document.getElementById('confirm_password');
+
+            if (form) {
+                form.addEventListener("submit", function (e) {
+                    if (passwordBaru.value !== "") {
+                        if (passwordBaru.value !== confirmPassword.value) {
+                            e.preventDefault(); // Menghentikan submit form jika tidak cocok
+                            confirmPassword.classList.add("is-invalid");
+                        } else {
+                            confirmPassword.classList.remove("is-invalid");
+                        }
+                    }
+                });
+            }
+        });
     </script>
-
 </body>
 
 </html>

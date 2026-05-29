@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_302_FOUND
+from sqlalchemy import func 
 
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
@@ -14,6 +15,7 @@ from app.models.tes import Tes
 from app.models.bank_soal import BankSoal
 from app.models.hasil_tes import HasilTes
 from app.models.detail_tes import DetailTes
+from app.models.jenis_hasil_tes import JenisHasilTes
 
 from app.services.huggingface_service import predict_kepribadian
 
@@ -120,17 +122,45 @@ async def logout():
 # DASHBOARD ROUTES
 
 @router.get("/mahasiswa/dashboard", response_class=HTMLResponse)
-async def mahasiswa_dashboard(request: Request):
-    # Check if user is logged in as mahasiswa
+async def mahasiswa_dashboard(request: Request, db: Session = Depends(get_db)):
+    # 1. Validasi Auth Cookie Session
     user_role = request.cookies.get("user_role")
-    if user_role != "mahasiswa":
+    user_id = request.cookies.get("user_id")
+    
+    if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     
+    user_id = int(user_id)
+
+    # 2. Ambil data lengkap objek Mahasiswa berdasarkan ID yang login
+    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == user_id).first()
+    if not mahasiswa:
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
+    # 3. Ambil list riwayat tes mahasiswa ini (di-join dengan tabel jenis_hasil_tes)
+    riwayat_tes = db.query(HasilTes).filter(HasilTes.ID_Mahasiswa == user_id)\
+        .order_by(HasilTes.Waktu_Selesai_Tes.desc()).all()
+
+    # 4. Hitung statistik untuk Grafik Lingkaran (Pie Chart)
+    # Menghitung berapa kali mahasiswa ini mendapatkan hasil Introvert, Ekstrovert, atau Ambivert
+    statistik = db.query(JenisHasilTes.Hasil, func.count(HasilTes.ID_Hasil))\
+        .join(HasilTes, JenisHasilTes.ID_Jenis == HasilTes.ID_Jenis)\
+        .filter(HasilTes.ID_Mahasiswa == user_id)\
+        .group_by(JenisHasilTes.Hasil).all()
+
+    # Ekstrak hasil query statistik menjadi list untuk Chart.js
+    grafik_labels = [row[0] for row in statistik]  # Contoh: ['Introvert', 'Ekstrovert']
+    grafik_data = [row[1] for row in statistik]    # Contoh: [3, 1]
+
+    # 5. Kembalikan semua data ke file HTML lewat Jinja2 Context
     return templates.TemplateResponse(
         "DashMhs.html",
         {
             "request": request,
-            "nama": request.cookies.get("user_nama", "Mahasiswa")
+            "mahasiswa": mahasiswa,        # Mengirimkan objek mahasiswa (Menghapus error Undefined)
+            "riwayat_tes": riwayat_tes,    # Mengirimkan list riwayat tes dinamis
+            "grafik_labels": grafik_labels,# Label tipe kepribadian untuk grafik
+            "grafik_data": grafik_data     # Total angka kemunculan untuk grafik
         }
     )
 
@@ -149,27 +179,80 @@ async def mahasiswa_tes(request: Request):
         }
     )
 
-@router.get("/mahasiswa/riwayat", response_class=HTMLResponse)
-async def riwayat_tes(request: Request):
+
+
+# 1. PERBARUI ENDPOINT GET PROFIL (Ubah agar mengambil data dari Database)
+@router.get("/mahasiswa/profil", response_class=HTMLResponse)
+async def profil_mahasiswa(
+    request: Request, 
+    msg_success: str = None, 
+    msg_error: str = None, 
+    db: Session = Depends(get_db)
+):
     user_role = request.cookies.get("user_role")
-    if user_role != "mahasiswa":
+    user_id = request.cookies.get("user_id")
+    
+    if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     
+    # Ambil data mahasiswa terupdate dari database
+    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
+    
     return templates.TemplateResponse(
-        "RiwayatTesMhs.html",
-        {"request": request}
+        "Profil_Mahasiswa.html", 
+        {
+            "request": request,
+            "mahasiswa": mahasiswa,
+            "msg_success": msg_success,
+            "msg_error": msg_error
+        }
     )
 
-@router.get("/mahasiswa/profil", response_class=HTMLResponse)
-async def profil_mahasiswa(request: Request):
+
+# 2. TAMBAHKAN ENDPOINT POST BARU INI TEPAT DI BAWAHNYA UNTUK PROSES EDIT DATA
+@router.post("/mahasiswa/profil/update")
+async def update_profil_mahasiswa(
+    request: Request,
+    nama_mahasiswa: str = Form(...),
+    email: str = Form(None),
+    biodata: str = Form(None),
+    password_baru: str = Form(None),
+    db: Session = Depends(get_db)
+):
     user_role = request.cookies.get("user_role")
-    if user_role != "mahasiswa":
+    user_id = request.cookies.get("user_id")
+    
+    if user_role != "mahasiswa" or not user_id:
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+        
+    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
+    if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     
-    return templates.TemplateResponse(
-        "Profil_Mahasiswa.html",
-        {"request": request}
-    )
+    try:
+        # Update Biodata Dasar
+        mahasiswa.Nama_Mahasiswa = nama_mahasiswa
+        mahasiswa.Email = email
+        mahasiswa.Biodata = biodata
+        
+        # Update Password jika user mengisi kolom password baru
+        if password_baru and password_baru.strip() != "":
+            # Catatan: Jika sistem Anda menggunakan hashing (misal: bcrypt), lakukan hash di sini:
+            # dari app.core.auth_utils import hash_password
+            # mahasiswa.Password_Mahasiswa = hash_password(password_baru)
+            mahasiswa.Password_Mahasiswa = password_baru
+            
+        db.commit()
+        
+        # Redirect kembali ke profil dengan membawa pesan sukses
+        response = RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
+        # Perbarui cookie nama panggillan top bar agar langsung tersinkronisasi
+        response.set_cookie(key="user_nama", value=nama_mahasiswa)
+        return response
+
+    except Exception as e:
+        db.rollback()
+        return RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
 
 @router.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):

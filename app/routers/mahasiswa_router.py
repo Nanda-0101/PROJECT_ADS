@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Form  # type: ig
 from fastapi.responses import HTMLResponse, RedirectResponse  # type: ignore[import]
 from fastapi.templating import Jinja2Templates  # type: ignore[import]
 from sqlalchemy.orm import Session
+from starlette.status import HTTP_302_FOUND
 
 from app.core.database import get_db  # Sesuaikan dengan fungsi get_db kamu
 from app.models.mahasiswa import Mahasiswa
@@ -20,7 +21,7 @@ def get_current_mahasiswa_id(request: Request):
         raise HTTPException(status_code=401, detail="Belum login")
     return int(mahasiswa_id)
 
-### ================= DASHBOARD ================= ###
+#  DASHBOARD  #
 @router.get("/dashboard", response_class=HTMLResponse)
 async def read_dashboard(request: Request, db: Session = Depends(get_db), mhs_id: int = Depends(get_current_mahasiswa_id)):
     mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == mhs_id).first()
@@ -49,7 +50,7 @@ async def read_dashboard(request: Request, db: Session = Depends(get_db), mhs_id
         "riwayat_tes": riwayat_tes             # Menyuplai riwayat tes singkat di dashboard
     })
 
-### ================= PROFIL (READ & UPDATE) ================= ###
+#  PROFIL (READ & UPDATE)  #
 @router.get("/profil", response_class=HTMLResponse)
 async def view_profil(
     request: Request, 
@@ -106,7 +107,7 @@ async def update_profil(
         db.rollback()
         return RedirectResponse(url="/mahasiswa/profil?msg_error=Gagal+memperbarui+profil", status_code=303)
 
-### ================= RIWAYAT TES ================= ###
+#  RIWAYAT TES  #
 @router.get("/riwayat", response_class=HTMLResponse)
 async def riwayat_tes_mahasiswa(request: Request, db: Session = Depends(get_db)):
     # 1. Ambil Cookie Session

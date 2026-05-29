@@ -81,14 +81,20 @@
                         {% if riwayat_tes %}
                             {% for tes in riwayat_tes %}
                             <div class="history-item" style="margin-bottom: 15px;">
-                                <strong>Hasil: 
-                                    {% if tes.jenis_hasil_tes %}
-                                        {{ tes.jenis_hasil_tes.Hasil }}
-                                    {% elif tes.ID_Jenis %}
-                                        Tipe ID {{ tes.ID_Jenis }}
+                                <strong>Hasil:   
+                                {% if tes.jenis_hasil_tes %}
+                                    {{ tes.jenis_hasil_tes.Hasil }}
+                                {% else %}                                      
+                                    {% if tes.ID_Jenis == 1 %}
+                                        Introvert
+                                    {% elif tes.ID_Jenis == 2 %}
+                                        Ekstrovert
+                                    {% elif tes.ID_Jenis == 3 %}
+                                        Ambivert
                                     {% else %}
                                         Belum Diketahui
                                     {% endif %}
+                                {% endif %}
                                 </strong>
                                 <br>
                                 <span class="text-muted" style="font-size: 0.85rem;">

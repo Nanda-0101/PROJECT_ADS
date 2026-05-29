@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.routers import router
+from app.routers import mahasiswa_router 
 from app.core.database import engine, Base
 from app.models import mahasiswa, admin  # Import models
 
@@ -13,7 +14,7 @@ app = FastAPI(title="SIPEKA - Sistem Informasi Kepribadian")
 app.include_router(router.router)
 
 # Include routers
-app.include_router(router.router)
+app.include_router(mahasiswa_router.router)
 
 # Mount static files
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

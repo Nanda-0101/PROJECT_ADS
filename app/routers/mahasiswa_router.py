@@ -8,6 +8,8 @@ from app.core.database import get_db  # Sesuaikan dengan fungsi get_db kamu
 from app.models.mahasiswa import Mahasiswa
 from app.models.hasil_tes import HasilTes
 from app.models.jenis_hasil_tes import JenisHasilTes
+from app.models.detail_tes import DetailTes
+from app.models.bank_soal import BankSoal
 from collections import Counter
 
 router = APIRouter(prefix="/mahasiswa", tags=["mahasiswa"])
@@ -138,5 +140,75 @@ async def riwayat_tes_mahasiswa(request: Request, db: Session = Depends(get_db))
             "request": request,
             "mahasiswa": mahasiswa,
             "daftar_riwayat": daftar_riwayat  # Berisi list dari tuple: [(HasilTes, JenisHasilTes), ...]
+        }
+    )
+
+@router.get("/riwayat/detail/{id_hasil}", response_class=HTMLResponse)
+async def detail_riwayat_tes(
+    id_hasil: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+
+    user_id = request.cookies.get("mahasiswa_id") or request.cookies.get("user_id")
+
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Belum login")
+
+    # Pastikan hasil tes milik mahasiswa yang login
+    hasil = db.query(HasilTes).filter(
+        HasilTes.ID_Hasil == id_hasil,
+        HasilTes.ID_Mahasiswa == int(user_id)
+    ).first()
+
+    if not hasil:
+        raise HTTPException(status_code=404, detail="Data tidak ditemukan")
+
+    # Join detail_tes + bank_soal
+    detail_jawaban = db.query(DetailTes, BankSoal).\
+        join(BankSoal, DetailTes.ID_Soal == BankSoal.ID_Soal).\
+        filter(DetailTes.ID_Hasil == id_hasil).\
+        order_by(DetailTes.ID_Soal.asc()).all()
+
+    hasil_detail = []
+
+    for detail, soal in detail_jawaban:
+
+        jawaban = detail.Jawaban_Mahasiswa
+
+        # Soal nomor 1 = jenis kelamin
+        if soal.ID_Soal == 1:
+            if jawaban == "1":
+                jawaban_text = "Laki-laki"
+            elif jawaban == "2":
+                jawaban_text = "Perempuan"
+            else:
+                jawaban_text = jawaban
+
+        # Soal nomor 2 = usia
+        elif soal.ID_Soal == 2:
+            jawaban_text = f"{jawaban} Tahun"
+
+        else:
+            mapping = {
+                "1": "Sangat Tidak Setuju",
+                "2": "Tidak Setuju",
+                "3": "Netral",
+                "4": "Setuju",
+                "5": "Sangat Setuju"
+            }
+
+            jawaban_text = mapping.get(jawaban, jawaban)
+
+        hasil_detail.append({
+            "soal": soal.Pertanyaan,
+            "jawaban": jawaban_text
+        })
+
+    return templates.TemplateResponse(
+        "PopupDetailRiwayat.html",
+        {
+            "request": request,
+            "hasil_detail": hasil_detail
         }
     )

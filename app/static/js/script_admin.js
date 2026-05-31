@@ -86,7 +86,19 @@ async function loadMahasiswa() {
 
 async function loadRiwayat() {
     try {
-        riwayatTesList = await fetchJSON('/api/riwayat');
+        // normalize incoming riwayat data to avoid undefined fields
+        const raw = await fetchJSON('/api/riwayat');
+        riwayatTesList = raw.map(r => {
+            return {
+                id: Number(r.id ?? r.id_hasil ?? r.ID_Hasil ?? null),
+                nim: r.nim ?? r.NIM ?? '-',
+                nama: r.nama ?? r.Nama_Mahasiswa ?? '-',
+                prodi: r.prodi ?? r.Prodi ?? '-',
+                tanggal: r.tanggal ?? r.Tanggal ?? '-',
+                skor: r.skor ?? r.Skor ?? '-',
+                status: r.status ?? (r.id_jenis ? (r.id_jenis == 1 ? 'Introvert' : (r.id_jenis == 2 ? 'Ekstrovert' : 'Ambivert')) : 'Unknown')
+            };
+        });
         renderRiwayatTable();
         updateStatistik();
     } catch (e) {
@@ -140,8 +152,9 @@ function renderRiwayatTable() {
     
     tbody.innerHTML = '';
     riwayatTesList.forEach((item, idx) => {
-        let statusClass = item.status.toLowerCase(); 
-        
+        let status = item.status || 'Unknown';
+        let statusClass = String(status).toLowerCase().replace(/\s+/g, '-');
+
         let row = `
             <tr>
                 <td>${idx+1}</td>
@@ -150,7 +163,7 @@ function renderRiwayatTable() {
                 <td>${item.prodi}</td>
                 <td>${item.tanggal}</td>
                 <td><strong>${item.skor}</strong></td>
-                <td><span class="status-badge ${statusClass}">${item.status}</span></td>
+                <td><span class="status-badge ${statusClass}">${status}</span></td>
                 <td class="text-center">
                     <button type="button" class="btn-detail-riwayat btn-lihat-detail" data-id="${item.id}">Detail</button>
                 </td>

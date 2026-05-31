@@ -211,6 +211,7 @@ function renderKelolaTable() {
                 <td class="col-nim">${m.nim}</td>
                 <td>${m.nama}</td>
                 <td>
+                    <button class="btn-edit btn-edit-mhs" data-id="${m.id}">Edit</button>
                     <button class="btn-hapus-custom btn-hapus-mhs" data-id="${m.id}">Hapus</button>
                 </td>
             </tr>
@@ -222,6 +223,23 @@ function renderKelolaTable() {
     document.querySelectorAll('.btn-hapus-mhs').forEach(btn => {
         btn.addEventListener('click', (e) => {
             bukaModalHapusStatis(btn.getAttribute('data-id'));
+        });
+    });
+    // edit buttons
+    document.querySelectorAll('.btn-edit-mhs').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = Number(btn.getAttribute('data-id'));
+            const m = mahasiswaList.find(x => x.id === id);
+            if (!m) return alert('Data mahasiswa tidak ditemukan');
+            // reuse the tambah modal for editing
+            document.getElementById('nimBaru').value = m.nim || '';
+            document.getElementById('namaBaru').value = m.nama || '';
+            document.getElementById('passwordBaru').value = '';
+            // store edit id on the form element
+            const form = document.getElementById('formTambahMahasiswa');
+            if (form) form.dataset.editId = String(id);
+            const modal = new bootstrap.Modal(document.getElementById('modalTambahMahasiswa'));
+            modal.show();
         });
     });
 } 
@@ -344,7 +362,35 @@ if(formTambahMhs) {
         let nim = document.getElementById('nimBaru').value.trim();
         let nama = document.getElementById('namaBaru').value.trim();
         let password = document.getElementById('passwordBaru').value.trim();
-        if (nim && nama && password) {
+        if (!nim || !nama) {
+            alert('NIM dan Nama harus diisi!');
+            return;
+        }
+        const editId = formTambahMhs.dataset.editId ? Number(formTambahMhs.dataset.editId) : null;
+        if (editId) {
+            // update flow
+            try {
+                await fetchJSON(`/api/mahasiswa/${editId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ NIM: nim, Nama_Mahasiswa: nama, Password_Mahasiswa: password || undefined })
+                });
+                delete formTambahMhs.dataset.editId;
+                formTambahMhs.reset();
+                let modal = bootstrap.Modal.getInstance(document.getElementById('modalTambahMahasiswa'));
+                if (modal) modal.hide();
+                await loadMahasiswa();
+                alert('Mahasiswa berhasil diperbarui');
+            } catch (err) {
+                console.error('Gagal memperbarui mahasiswa:', err);
+                alert('Gagal memperbarui mahasiswa. Silakan coba lagi.');
+            }
+        } else {
+            // create flow
+            if (password.trim() === '') {
+                alert('Password harus diisi saat menambah mahasiswa baru');
+                return;
+            }
             try {
                 await tambahMahasiswa(nim, nama, password);
                 formTambahMhs.classList.add('d-none');
@@ -357,8 +403,6 @@ if(formTambahMhs) {
                 console.error('Gagal menambah mahasiswa:', err);
                 alert('Gagal menambah mahasiswa. Silakan coba lagi.');
             }
-        } else {
-            alert('Semua field harus diisi!');
         }
     });
 }

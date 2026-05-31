@@ -60,6 +60,36 @@ body {
     padding: 0.5rem 1.5rem; border-radius: 8px;
     font-weight: 600; transition: all 0.25s ease-in-out;
 }
+
+.ios-glass-modal {
+    border-radius: 24px !important; 
+    background: #F3E3D0 !important; 
+    backdrop-filter: blur(20px) saturate(180%) !important; 
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12) !important;
+    overflow: hidden;
+}
+
+.ios-btn-glass {
+    font-size: 16px !important;
+    padding: 14px 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease !important;
+    box-shadow: none !important;
+}
+
+.ios-btn-glass:hover,
+.ios-btn-glass:active {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+.ios-btn-glass.text-secondary {
+    color: #6c757d !important;
+}
+
 .logout-btn:hover { opacity: 0.9; }
 
 .quiz-card-box {
@@ -195,6 +225,28 @@ body {
     line-height: 1.6;
     max-width: 520px;
 }
+
+.ios-glass-modal {
+    border-radius: 24px !important;
+    background: #F3E3D0 !important; 
+    backdrop-filter: blur(20px) saturate(180%) !important; 
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important; 
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12) !important;
+    overflow: hidden;
+}
+
+.ios-btn-glass {
+    font-size: 16px !important;
+    padding: 14px 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    transition: background-color 0.15s ease !important;
+    box-shadow: none !important;
+}
+.ios-btn-glass:hover, .ios-btn-glass:active { background-color: rgba(0, 0, 0, 0.04) !important; }
+.ios-btn-glass.text-secondary { color: #6c757d !important; }
 
 @keyframes scaleInIcon {
     from { opacity: 0; transform: scale(0.6); }

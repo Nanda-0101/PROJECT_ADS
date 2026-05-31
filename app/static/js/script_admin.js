@@ -242,11 +242,20 @@ function bukaModalHapusStatis(idMahasiswa) {
 }
 
 // Tambah mahasiswa
-function tambahMahasiswa(nim, nama, password) {
-    let newId = mahasiswaList.length > 0 ? Math.max(...mahasiswaList.map(m => m.id)) + 1 : 1;
-    mahasiswaList.push({ id: newId, nim, nama, prodi: "Informatika", password });
-    renderKelolaTable();
-    updateStatistik();
+async function tambahMahasiswa(nim, nama, password) {
+    await fetchJSON('/api/mahasiswa', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            NIM: nim,
+            Nama_Mahasiswa: nama,
+            Password_Mahasiswa: password
+        })
+    });
+
+    await loadMahasiswa();
 }
 
 // ========== NAVIGASI ==========
@@ -324,20 +333,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
    const formTambahMhs = document.getElementById('formTambahMahasiswa');
 if(formTambahMhs) {
-    formTambahMhs.addEventListener('submit', (e) => {
+        formTambahMhs.addEventListener('submit', async (e) => {
         e.preventDefault();
         let nim = document.getElementById('nimBaru').value.trim();
         let nama = document.getElementById('namaBaru').value.trim();
         let password = document.getElementById('passwordBaru').value.trim();
         if (nim && nama && password) {
-            tambahMahasiswa(nim, nama, password);
-            formTambahMhs.classList.add('d-none');
-            const successBox = document.getElementById('successBox');
-            if(successBox) {
-                successBox.classList.remove('d-none');
+            try {
+                await tambahMahasiswa(nim, nama, password);
+                formTambahMhs.classList.add('d-none');
+                const successBox = document.getElementById('successBox');
+                if(successBox) {
+                    successBox.classList.remove('d-none');
+                }
+                formTambahMhs.reset();
+            } catch (err) {
+                console.error('Gagal menambah mahasiswa:', err);
+                alert('Gagal menambah mahasiswa. Silakan coba lagi.');
             }
-            
-            formTambahMhs.reset();
         } else {
             alert('Semua field harus diisi!');
         }
@@ -430,17 +443,22 @@ if(modalTambahMhsElement) {
 
     const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
     if(confirmLogoutBtn) {
-        confirmLogoutBtn.addEventListener('click', () => {
+        confirmLogoutBtn.addEventListener('click', async () => {
             if (idMahasiswaYangAkanDihapus !== null) {
-                mahasiswaList = mahasiswaList.filter(m => m.id !== idMahasiswaYangAkanDihapus);
-                
-                renderKelolaTable();
-                updateStatistik();
-                
-                let modalElement = document.getElementById('logoutModal');
-                let modalInstance = bootstrap.Modal.getInstance(modalElement);
-                if(modalInstance) modalInstance.hide();
-                idMahasiswaYangAkanDihapus = null;
+                try {
+                    await fetchJSON(`/api/mahasiswa/${idMahasiswaYangAkanDihapus}`, {
+                        method: 'DELETE'
+                    });
+                    await loadMahasiswa();
+
+                    let modalElement = document.getElementById('logoutModal');
+                    let modalInstance = bootstrap.Modal.getInstance(modalElement);
+                    if(modalInstance) modalInstance.hide();
+                    idMahasiswaYangAkanDihapus = null;
+                } catch (err) {
+                    console.error('Gagal menghapus mahasiswa:', err);
+                    alert('Gagal menghapus mahasiswa. Silakan coba lagi.');
+                }
             } else {
                 window.location.href = "/logout"; 
             }

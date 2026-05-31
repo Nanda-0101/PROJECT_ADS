@@ -108,7 +108,13 @@ async function loadRiwayat() {
 
 async function loadAdminProfile() {
     try {
-        profilAdmin = await fetchJSON('/api/admin/profile');
+        const raw = await fetchJSON('/api/admin/profile');
+        profilAdmin = {
+            nama: raw.nama ?? raw.username ?? '-',
+            nip: raw.nip ?? raw.id ?? '-',
+            email: raw.email ?? '-',
+            fullFakultas: raw.fullFakultas ?? raw.fakultas ?? '-'
+        };
         updateProfilUI();
     } catch (e) {
         console.error('Gagal memuat profil admin:', e);
@@ -129,7 +135,7 @@ function updateStatistik() {
         let maxCount = 0;
 
         riwayatTesList.forEach(t => {
-            let status = t.status;
+            let status = t.status || 'Unknown';
             counts[status] = (counts[status] || 0) + 1;
             
             if (counts[status] > maxCount) {
@@ -280,11 +286,11 @@ function showPage(pageId) {
 }
 
 function updateProfilUI() {
-    if(document.getElementById('profilNama')) document.getElementById('profilNama').innerText = profilAdmin.nama;
-    if(document.getElementById('profilNip')) document.getElementById('profilNip').innerText = profilAdmin.nip;
-    if(document.getElementById('profilEmail')) document.getElementById('profilEmail').innerText = profilAdmin.email;
-    if(document.getElementById('profilFakultas')) document.getElementById('profilFakultas').innerText = profilAdmin.fullFakultas;
-    if(document.getElementById('headerNip')) document.getElementById('headerNip').innerText = `NIP ${profilAdmin.nip}`;
+    if(document.getElementById('profilNama')) document.getElementById('profilNama').innerText = profilAdmin.nama || '-';
+    if(document.getElementById('profilNip')) document.getElementById('profilNip').innerText = profilAdmin.nip || '-';
+    if(document.getElementById('profilEmail')) document.getElementById('profilEmail').innerText = profilAdmin.email || '-';
+    if(document.getElementById('profilFakultas')) document.getElementById('profilFakultas').innerText = profilAdmin.fullFakultas || '-';
+    if(document.getElementById('headerNip')) document.getElementById('headerNip').innerText = `NIP ${profilAdmin.nip || '-'}`;
 }
 
 function editProfil(nama, nip, email, fakultas) {

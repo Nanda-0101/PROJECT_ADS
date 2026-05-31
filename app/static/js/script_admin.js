@@ -60,28 +60,48 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 });
 
-// ========== DATA DUMMY ==========
-let mahasiswaList = [
-    { id: 1, nim: "2508561140", nama: "Anak Agung Nanda Aditya", prodi: "Informatika", password: "pass123" },
-    { id: 2, nim: "2409123001", nama: "Budi Santoso", prodi: "Matematika", password: "pass123" },
-    { id: 3, nim: "2501012004", nama: "Cynthia Dewi", prodi: "Fisika", password: "pass123" },
-    { id: 4, nim: "2103124509", nama: "Dian Pramana", prodi: "Kimia", password: "pass123" }
-];
+// ========== DATA (loaded from backend) ==========
+let mahasiswaList = [];
+let riwayatTesList = [];
+let profilAdmin = {};
 
-let riwayatTesList = [
-    { id: 1, nim: "2508561140", nama: "Anak Agung Nanda Aditya", prodi: "Informatika", tanggal: "10 Maret 2025", skor: 85, status: "Introvert" },
-    { id: 2, nim: "2409123001", nama: "Budi Santoso", prodi: "Matematika", tanggal: "14 Maret 2025", skor: 78, status: "Introvert" },
-    { id: 3, nim: "2501012004", nama: "Cynthia Dewi", prodi: "Fisika", tanggal: "20 Maret 2025", skor: 62, status: "Ambivert" },
-    { id: 4, nim: "2103124509", nama: "Dian Pramana", prodi: "Kimia", tanggal: "5 April 2025", skor: 45, status: "Ambivert" },
-    { id: 5, nim: "2508561140", nama: "Anak Agung Nanda Aditya", prodi: "Informatika", tanggal: "12 April 2025", skor: 92, status: "Extrovert" }
-];
+async function fetchJSON(url, options) {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error(`HTTP ${res.status} ${res.statusText} - ${txt}`);
+    }
+    return res.json();
+}
 
-let profilAdmin = {
-    nama: "Dr. Andhika Pratamuy, S.Kom, M.Cs",
-    nip: "198501012010121003",
-    email: "andhi.pratam67@unud.ac.id",
-    fullFakultas: "Matematika dan Ilmu Pengetahuan Alam"
-};
+async function loadMahasiswa() {
+    try {
+        mahasiswaList = await fetchJSON('/api/mahasiswa');
+        renderKelolaTable();
+        updateStatistik();
+    } catch (e) {
+        console.error('Gagal memuat mahasiswa:', e);
+    }
+}
+
+async function loadRiwayat() {
+    try {
+        riwayatTesList = await fetchJSON('/api/riwayat');
+        renderRiwayatTable();
+        updateStatistik();
+    } catch (e) {
+        console.error('Gagal memuat riwayat:', e);
+    }
+}
+
+async function loadAdminProfile() {
+    try {
+        profilAdmin = await fetchJSON('/api/admin/profile');
+        updateProfilUI();
+    } catch (e) {
+        console.error('Gagal memuat profil admin:', e);
+    }
+}
 
 // ========== HELPER FUNCTIONS ==========
 function updateStatistik() {
@@ -255,9 +275,12 @@ function editProfil(nama, nip, email, fakultas) {
 
 // ========== EVENT LISTENERS ==========
 document.addEventListener('DOMContentLoaded', () => {
-    renderKelolaTable();
-    renderRiwayatTable();
-    showPage('dashboard');
+    (async () => {
+        await loadMahasiswa();
+        await loadRiwayat();
+        await loadAdminProfile();
+        showPage('dashboard');
+    })();
 
     document.querySelectorAll('.nav-link').forEach(link => {
         link.addEventListener('click', (e) => {

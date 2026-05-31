@@ -246,15 +246,24 @@ def delete_mahasiswa(id_mahasiswa: int, db: Session = Depends(get_db)):
 
 @router.get("/api/riwayat")
 def list_riwayat(db: Session = Depends(get_db)):
-    rows = db.query(HasilTes, Mahasiswa).join(Mahasiswa, Mahasiswa.ID_Mahasiswa == HasilTes.ID_Mahasiswa).order_by(HasilTes.ID_Hasil.desc()).all()
+    rows = db.query(HasilTes).order_by(HasilTes.ID_Hasil.desc()).all()
     mapping = {1: "Introvert", 2: "Ekstrovert", 3: "Ambivert"}
     result = []
-    for hasil, mahasiswa in rows:
+    for hasil in rows:
+        mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == hasil.ID_Mahasiswa).first()
+        # safe prodi access (may not exist in DB)
+        prodi = getattr(mahasiswa, 'Prodi', None) if mahasiswa is not None else None
+        prodi = prodi if prodi not in (None, '') else '-'
+        # compute skor from DetailTes (sum of Jawaban_Mahasiswa)
+        skor_sum = db.query(func.sum(DetailTes.Jawaban_Mahasiswa)).filter(DetailTes.ID_Hasil == hasil.ID_Hasil).scalar()
+        skor = int(skor_sum) if skor_sum is not None else 0
         result.append({
             "id_hasil": hasil.ID_Hasil,
-            "nim": int(mahasiswa.NIM) if mahasiswa.NIM is not None else None,
-            "nama": mahasiswa.Nama_Mahasiswa,
+            "nim": int(mahasiswa.NIM) if mahasiswa and mahasiswa.NIM is not None else None,
+            "nama": mahasiswa.Nama_Mahasiswa if mahasiswa else '-',
+            "prodi": prodi,
             "tanggal": hasil.Waktu_Selesai_Tes.isoformat() if hasil.Waktu_Selesai_Tes else None,
+            "skor": skor,
             "id_jenis": hasil.ID_Jenis,
             "status": mapping.get(hasil.ID_Jenis, "Unknown"),
         })

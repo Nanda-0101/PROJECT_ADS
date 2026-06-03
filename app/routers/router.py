@@ -9,7 +9,6 @@ from sqlalchemy import func
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
 from app.models.mahasiswa import Mahasiswa
-from app.schemas.auth import LoginRequest, LoginResponse
 
 from app.models.tes import Tes
 from app.models.bank_soal import BankSoal

@@ -1,0 +1,183 @@
+body {
+    background: #d5c7b3;
+    color: #2f2f2f;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+.dashboard-shell {
+    min-height: 100vh;
+    display: flex;
+    align-items: stretch;
+}
+
+.sidebar {
+    width: 280px !important;
+    min-width: 280px !important;
+    max-width: 280px !important;
+    height: 100vh !important;
+    background-color: #8ca9c4 !important;
+    position: fixed !important;
+    left: 0 !important; 
+    top: 0 !important;
+    padding: 32px 24px !important;        
+    z-index: 1000 !important;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.05) !important;
+    box-sizing: border-box !important;
+}
+
+.sidebar-brand h2 {
+    color: white !important; 
+    font-size: 24px !important;            
+    font-weight: 700 !important;
+    margin-top: 0 !important;              
+    margin-bottom: 3px !important;        
+    line-height: 1.2 !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+.sidebar .nav-link {
+    background-color: #F3E3D0 !important;  
+    color: #4A4A4A !important;            
+    padding: 13px 19px !important;       
+    border-radius: 12px !important; 
+    margin-bottom: 12px !important; 
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    white-space: nowrap !important; 
+    text-decoration: none !important;
+    font-weight: 700 !important;
+    transition: all 0.3s !important;
+    box-sizing: border-box !important;
+    font-family: 'Poppins', sans-serif !important;
+}
+
+.sidebar .nav-link:hover, 
+.sidebar .nav-link.active {
+    background-color: #e5d4c1 !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+}
+
+.sidebar .menu-icon { 
+    width: 24px !important; 
+    height: 24px !important; 
+    color: #000000 !important;
+    object-fit: contain !important;
+}
+
+.main-panel, .main-content {
+    margin-left: 280px !important;        
+    flex: 1 !important;
+    box-sizing: border-box !important;
+}
+
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    background: #7aa9cc;
+    border-radius: 16px;
+    padding: 18px 24px;
+    color: #fff;
+}
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-image: url('../assets/Iseng.png');
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    background-size: cover;
+    background-position: center;
+}
+.top-bar .profile-name {
+    margin-bottom: 6px;
+    font-size: 18px;
+    font-weight: 700;
+}
+.top-bar .profile-id {
+    font-size: 13px;
+    opacity: 0.88;
+}
+.top-bar .btn-logout {
+    background: #d21717;
+    border: none;
+    padding: 10px 18px;
+    color: #fff;
+    border-radius: 8px;
+}
+.dashboard-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 20px;
+}
+.dashboard-card {
+    background: #eddcc8;
+    border-radius: 18px;
+    padding: 28px 24px;
+    min-height: 200px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+}
+.dashboard-card i {
+    font-size: 40px;
+    margin-bottom: 18px;
+    color: #2f2f2f;
+}
+.dashboard-card h3 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.dashboard-card p {
+    margin: 0;
+    color: #3f3f3f;
+    font-size: 14px;
+}
+.history-card {
+    background: #eddcc8;
+    border-radius: 18px;
+    padding: 26px;
+    min-height: 240px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.history-card h4 {
+    margin-top: 0;
+    font-weight: 700;
+    text-align: center;
+}
+.history-item {
+    background: rgba(255,255,255,0.76);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+.history-item:last-child {
+    margin-bottom: 0;
+}
+.history-item strong {
+    display: block;
+    margin-bottom: 6px;
+}
+@media (max-width: 991px) {
+    .dashboard-shell {
+        flex-direction: column;
+    }
+    .sidebar {
+        width: 100%;
+    }
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}

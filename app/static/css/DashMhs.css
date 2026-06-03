@@ -249,6 +249,7 @@ h1, h2, h3, h4, h5, h6, p, span, a, button, input, select, table {
 @media (max-width: 992px) {
       .sidebar { 
           display: none !important;
+      }
       .main-content { 
           margin-left: 0 !important; 
           padding: 1.5rem !important;

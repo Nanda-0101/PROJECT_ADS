@@ -5,124 +5,123 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIPEKA Dashboard - Profil Mahasiswa</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-    <link rel="stylesheet" href="../static/css/style_profilmahasiswa.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/style_profilmahasiswa.css?v=7">
 </head>
 
 <body>
 
     <div class="modal fade" id="logoutModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Konfirmasi Logout</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content ios-glass-modal">
+            <div class="modal-body p-4 text-center">
+                <div class="d-flex align-items-center justify-content-center mb-2 text-danger">
+                    <i class="material-icons" style="font-size: 32px;">power_settings_new</i>
                 </div>
-                <div class="modal-body">
-                    Apakah Anda yakin ingin logout?
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmLogoutBtn">Logout</button>
-                </div>
+                <h6 class="fw-bold mb-2" style="font-size: 18px; color: #111111; letter-spacing: -0.3px;">Konfirmasi Keluar Sesi</h6>
+                <p class="text-muted mb-1" style="font-size: 14px; line-height: 1.45;">Apakah Anda yakin ingin melakukan logout?</p>
+            </div>
+            <div class="d-flex border-top" style="border-color: rgba(0,0,0,0.1) !important;">
+                <button type="button" class="btn w-50 ios-btn-glass text-secondary border-end" data-bs-dismiss="modal" style="border-color: rgba(0,0,0,0.1) !important;">Cancel</button>
+                <button type="button" class="btn w-50 ios-btn-glass fw-semibold text-danger" id="confirmLogoutBtn">Logout</button>
             </div>
         </div>
     </div>
+</div>
 
-    <aside class="sidebar">
-        {% include 'Mahasiswa_Navigasi.html' %}
-    </aside>
-
-    <main class="main-content fade-in">
-
-        <header class="top-nav">
-            <div class="admin-info">
-                <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="admin-avatar">
-                <div>
-                    <h6 class="mb-0 fw-medium">Selamat datang, {{ mahasiswa.Nama_Mahasiswa }}!</h6>
-                    <small>NIM {{ mahasiswa.NIM }}</small>
-                </div>
-            </div>
-            <div>
-                <button class="logout-btn" id="logoutBtn">Logout</button>
-            </div>
-        </header>
-
-        {% if msg_success %}
-        <div class="alert alert-success alert-dismissible fade show mx-4 mt-3" role="alert">
-            <i class="material-icons align-middle me-2" style="font-size: 20px;">check_circle</i> {{ msg_success }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
+    <div class="dashboard-shell">
         
-        {% if msg_error %}
-        <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
-            <i class="material-icons align-middle me-2" style="font-size: 20px;">error</i> {{ msg_error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        {% endif %}
+        <aside class="sidebar">
+            {% include 'Mahasiswa_Navigasi.html' %}
+        </aside>
 
-        <div class="profile-card-box rounded-4 overflow-hidden shadow-sm mx-4 mt-3">
-            <div class="profile-banner"></div>
+        <main class="main-content">
 
-            <div class="d-flex justify-content-between align-items-start px-4 position-relative" style="margin-bottom: 10px;">
-                <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="profile-avatar-large">
-                
-                <button class="btn-contact mt-3 shadow-sm d-inline-flex align-items-center justify-content-center"
-                        data-bs-toggle="modal" data-bs-target="#editProfilModal">
-                    <span class="material-icons align-middle me-2" style="font-size:18px">edit</span>
-                    Edit Informasi Akun Pengguna
-                </button>
+            <header class="top-nav">
+                <div class="admin-info">
+                    <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="admin-avatar">
+                    <div>
+                        <h6 class="mb-0 fw-medium">Selamat datang, {{ mahasiswa.Nama_Mahasiswa }}!</h6>
+                        <small>NIM {{ mahasiswa.NIM }}</small>
+                    </div>
+                </div>
+                <div>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </header>
+
+            {% if msg_success %}
+            <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                <i class="material-icons align-middle me-2" style="font-size: 20px;">check_circle</i> {{ msg_success }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+            {% endif %}
+            
+            {% if msg_error %}
+            <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                <i class="material-icons align-middle me-2" style="font-size: 20px;">error</i> {{ msg_error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
 
-            <div class="p-4 pt-2">
-                <h3 class="fw-semibold mb-0 text-dark-custom">{{ mahasiswa.Nama_Mahasiswa }}</h3>
-                <p class="text-muted-custom mb-4">
-                    Mahasiswa Fakultas Matematika dan Ilmu Pengetahuan Alam
-                </p>
+            <div class="profile-card-box rounded-4 overflow-hidden shadow-sm">
+                <div class="profile-banner"></div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR INDUK MAHASISWA (NIM)</small>
-                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.NIM }}</span>
-                    </div>
+                <div class="d-flex justify-content-between align-items-start px-4 position-relative" style="margin-bottom: 10px;">
+                    <img src="../static/assets/Iseng.png" alt="Mahasiswa" class="profile-avatar-large">
+                    
+                    <button class="btn-contact mt-3 shadow-sm d-inline-flex align-items-center justify-content-center"
+                            data-bs-toggle="modal" data-bs-target="#editProfilModal">
+                        <span class="material-icons align-middle me-2" style="font-size:18px">edit</span>
+                        Edit Informasi Akun Pengguna
+                    </button>
+                </div>
 
-                    <div class="col-md-6 mb-4">
-                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">EMAIL</small>
-                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Email if mahasiswa.Email else '-' }}</span>
-                    </div>
+                <div class="p-4 pt-2">
+                    <h3 class="fw-semibold mb-0 text-dark-custom">{{ mahasiswa.Nama_Mahasiswa }}</h3>
+                    <p class="text-muted-custom mb-4">
+                        Mahasiswa Fakultas Matematika dan Ilmu Pengetahuan Alam
+                    </p>
 
-                    <div class="col-md-6 mb-4">
-                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR TELEPON</small>
-                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Nomor_Telepon if mahasiswa.Nomor_Telepon else '-' }}</span>
-                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR INDUK MAHASISWA (NIM)</small>
+                            <span class="fw-semibold text-dark-custom">{{ mahasiswa.NIM }}</span>
+                        </div>
 
-                    <div class="col-md-6 mb-4">
-                        <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">ALAMAT</small>
-                        <span class="fw-semibold text-dark-custom">{{ mahasiswa.Alamat if mahasiswa.Alamat else '-' }}</span>
-                    </div>
+                        <div class="col-md-6 mb-4">
+                            <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">EMAIL</small>
+                            <span class="fw-semibold text-dark-custom">{{ mahasiswa.Email if mahasiswa.Email else '-' }}</span>
+                        </div>
 
-                    <div class="col-12 mb-4">
-                        <div class="p-4 glass-ios section-bio">
-                            <h6 class="fw-semibold mb-2 d-flex align-items-center gap-2 text-dark-custom">
-                                <span class="material-icons" style="font-size: 18px;">info</span>
-                                Deskripsi
-                            </h6>
-                            <p class="mb-0 text-secondary-custom" style="font-size: 14px; line-height: 1.6; white-space: pre-line;">
-                                {{ mahasiswa.Deskripsi if mahasiswa.Deskripsi else 'Belum ada deskripsi biodata. Silakan tambahkan melalui tombol edit.' }}
-                            </p>
+                        <div class="col-md-6 mb-4">
+                            <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">NOMOR TELEPON</small>
+                            <span class="fw-semibold text-dark-custom">{{ mahasiswa.Nomor_Telepon if mahasiswa.Nomor_Telepon else '-' }}</span>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <small class="text-muted-custom d-block fw-medium tracking-wide mb-1">ALAMAT</small>
+                            <span class="fw-semibold text-dark-custom">{{ mahasiswa.Alamat if mahasiswa.Alamat else '-' }}</span>
+                        </div>
+
+                        <div class="col-12 mb-4">
+                            <div class="p-4 glass-ios section-bio">
+                                <h6 class="fw-semibold mb-2 d-flex align-items-center gap-2 text-dark-custom">
+                                    <span class="material-icons" style="font-size: 18px;">info</span>
+                                    Deskripsi
+                                </h6>
+                                <p class="mb-0 text-secondary-custom" style="font-size: 14px; line-height: 1.6; white-space: pre-line;">
+                                    {{ mahasiswa.Deskripsi if mahasiswa.Deskripsi else 'Belum ada deskripsi biodata. Silakan tambahkan melalui tombol edit.' }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div> 
 
     <div class="modal fade" id="editProfilModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -173,7 +172,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <h6 class="fw-semibold mb-3 text-danger">Ganti Password (Opsional)</h6>
+                                <h6 class="fw-semibold mb-3 text-danger">Ganti Password</h6>
                                 <p class="text-muted mb-3" style="font-size: 12px;">Kosongkan area di bawah ini jika Anda tidak ingin merubah password saat ini.</p>
 
                                 <div class="mb-3">
@@ -204,7 +203,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Handler Modal Logout
             const logoutBtn = document.getElementById("logoutBtn");
             const confirmLogoutBtn = document.getElementById("confirmLogoutBtn");
             const logoutModalEl = document.getElementById("logoutModal");
@@ -222,7 +220,7 @@
                 });
             }
 
-            // Validasi Kecocokan Password Sebelum Form Dikirim
+            // Validasi Kecocokan Password 
             const form = document.querySelector('form[action="/mahasiswa/profil/update"]');
             const passwordBaru = document.querySelector('input[name="password_baru"]');
             const confirmPassword = document.getElementById('confirm_password');
@@ -231,7 +229,7 @@
                 form.addEventListener("submit", function (e) {
                     if (passwordBaru.value !== "") {
                         if (passwordBaru.value !== confirmPassword.value) {
-                            e.preventDefault(); // Menghentikan submit form jika tidak cocok
+                            e.preventDefault();
                             confirmPassword.classList.add("is-invalid");
                         } else {
                             confirmPassword.classList.remove("is-invalid");
@@ -242,5 +240,4 @@
         });
     </script>
 </body>
-
 </html>

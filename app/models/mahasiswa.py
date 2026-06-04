@@ -9,6 +9,7 @@ class Mahasiswa(Base):
     ID_Mahasiswa = Column(Integer, primary_key=True, index=True)
     NIM = Column(BigInteger, unique=True, nullable=False)
     Nama_Mahasiswa = Column(String(100), nullable=False)
+    Prodi = Column(String(100), nullable=True)
     Password_Mahasiswa = Column(String(255), nullable=False)
     Alamat = Column(Text, nullable=True)
     Nomor_Telepon = Column(String(20), nullable=True)

@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends, HTTPException, Form, Body
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, inspect, text
 from starlette.status import HTTP_302_FOUND
 
 from app.core.database import get_db
@@ -23,6 +23,48 @@ from datetime import datetime
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
+
+
+def _mahasiswa_columns(db: Session) -> set[str]:
+    return {column["name"] for column in inspect(db.get_bind()).get_columns("mahasiswa")}
+
+
+def _mahasiswa_select_row(db: Session, id_mahasiswa: int):
+    columns = [
+        "ID_Mahasiswa",
+        "NIM",
+        "Nama_Mahasiswa",
+        "Password_Mahasiswa",
+        "Alamat",
+        "Nomor_Telepon",
+        "Email",
+        "Deskripsi",
+        "created_by",
+    ]
+    available_columns = [column for column in columns if column in _mahasiswa_columns(db)]
+    if "Prodi" in _mahasiswa_columns(db):
+        available_columns.insert(3, "Prodi")
+    sql = text(f"SELECT {', '.join(available_columns)} FROM mahasiswa WHERE ID_Mahasiswa = :id_mahasiswa")
+    return db.execute(sql, {"id_mahasiswa": id_mahasiswa}).mappings().first()
+
+
+def _mahasiswa_all_rows(db: Session):
+    columns = [
+        "ID_Mahasiswa",
+        "NIM",
+        "Nama_Mahasiswa",
+        "Password_Mahasiswa",
+        "Alamat",
+        "Nomor_Telepon",
+        "Email",
+        "Deskripsi",
+        "created_by",
+    ]
+    available_columns = [column for column in columns if column in _mahasiswa_columns(db)]
+    if "Prodi" in _mahasiswa_columns(db):
+        available_columns.insert(3, "Prodi")
+    sql = text(f"SELECT {', '.join(available_columns)} FROM mahasiswa ORDER BY ID_Mahasiswa ASC")
+    return db.execute(sql).mappings().all()
 
 
 # PAGE ROUTES
@@ -175,61 +217,85 @@ async def admin_profil(request: Request):
 
 @router.get("/api/mahasiswa")
 def list_mahasiswa(db: Session = Depends(get_db)):
-    rows = db.query(Mahasiswa).all()
+    rows = _mahasiswa_all_rows(db)
     return [
         {
-            "id": m.ID_Mahasiswa,
-            "nim": int(m.NIM) if m.NIM is not None else None,
-            "nama": m.Nama_Mahasiswa,
-            "email": m.Email,
-            "alamat": m.Alamat,
-            "nomor_telepon": m.Nomor_Telepon,
-            "deskripsi": m.Deskripsi,
-            "created_by": getattr(m, 'created_by', None),
+            "id": row["ID_Mahasiswa"],
+            "nim": int(row["NIM"]) if row.get("NIM") is not None else None,
+            "nama": row.get("Nama_Mahasiswa"),
+            "prodi": row.get("Prodi", "-"),
+            "email": row.get("Email"),
+            "alamat": row.get("Alamat"),
+            "nomor_telepon": row.get("Nomor_Telepon"),
+            "deskripsi": row.get("Deskripsi"),
+            "created_by": row.get("created_by"),
         }
-        for m in rows
+        for row in rows
     ]
 
 
 @router.post("/api/mahasiswa", status_code=201)
 def create_mahasiswa(payload: dict = Body(...), db: Session = Depends(get_db)):
-    mahasiswa = Mahasiswa(
-        NIM=int(payload.get("NIM")) if payload.get("NIM") is not None else None,
-        Nama_Mahasiswa=payload.get("Nama_Mahasiswa"),
-        Password_Mahasiswa=payload.get("Password_Mahasiswa"),
-        Alamat=payload.get("Alamat"),
-        Nomor_Telepon=payload.get("Nomor_Telepon"),
-        Email=payload.get("Email"),
-        Deskripsi=payload.get("Deskripsi"),
-        created_by=payload.get("created_by"),
+    columns = _mahasiswa_columns(db)
+    fields = []
+    values = {}
+
+    def add_field(column_name: str, value):
+        if column_name in columns and value is not None:
+            fields.append(column_name)
+            values[column_name] = value
+
+    add_field("NIM", int(payload["NIM"]) if payload.get("NIM") is not None else None)
+    add_field("Nama_Mahasiswa", payload.get("Nama_Mahasiswa"))
+    add_field("Prodi", payload.get("Prodi"))
+    add_field("Password_Mahasiswa", payload.get("Password_Mahasiswa"))
+    add_field("Alamat", payload.get("Alamat"))
+    add_field("Nomor_Telepon", payload.get("Nomor_Telepon"))
+    add_field("Email", payload.get("Email"))
+    add_field("Deskripsi", payload.get("Deskripsi"))
+    add_field("created_by", payload.get("created_by"))
+
+    if not fields:
+        raise HTTPException(status_code=400, detail="Tidak ada data yang dapat disimpan")
+
+    insert_sql = text(
+        f"INSERT INTO mahasiswa ({', '.join(fields)}) VALUES ({', '.join(f':{field}' for field in fields)})"
     )
-    db.add(mahasiswa)
+    result = db.execute(insert_sql, values)
     db.commit()
-    db.refresh(mahasiswa)
-    return {"success": True, "id": mahasiswa.ID_Mahasiswa}
+    inserted_id = result.lastrowid
+    return {"success": True, "id": inserted_id}
 
 
 @router.put("/api/mahasiswa/{id_mahasiswa}")
 def update_mahasiswa(id_mahasiswa: int, payload: dict = Body(...), db: Session = Depends(get_db)):
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == id_mahasiswa).first()
-    if not mahasiswa:
+    columns = _mahasiswa_columns(db)
+    existing = _mahasiswa_select_row(db, id_mahasiswa)
+    if not existing:
         raise HTTPException(status_code=404, detail="Mahasiswa not found")
-    if payload.get("NIM") is not None:
-        mahasiswa.NIM = int(payload["NIM"])
-    if payload.get("Nama_Mahasiswa") is not None:
-        mahasiswa.Nama_Mahasiswa = payload["Nama_Mahasiswa"]
-    if payload.get("Password_Mahasiswa") is not None:
-        mahasiswa.Password_Mahasiswa = payload["Password_Mahasiswa"]
-    if payload.get("Alamat") is not None:
-        mahasiswa.Alamat = payload["Alamat"]
-    if payload.get("Nomor_Telepon") is not None:
-        mahasiswa.Nomor_Telepon = payload["Nomor_Telepon"]
-    if payload.get("Email") is not None:
-        mahasiswa.Email = payload["Email"]
-    if payload.get("Deskripsi") is not None:
-        mahasiswa.Deskripsi = payload["Deskripsi"]
-    if payload.get("created_by") is not None:
-        mahasiswa.created_by = payload["created_by"]
+    updates = []
+    values = {"id_mahasiswa": id_mahasiswa}
+
+    def add_update(column_name: str, value):
+        if column_name in columns and value is not None:
+            updates.append(f"{column_name} = :{column_name}")
+            values[column_name] = value
+
+    add_update("NIM", int(payload["NIM"]) if payload.get("NIM") is not None else None)
+    add_update("Nama_Mahasiswa", payload.get("Nama_Mahasiswa"))
+    add_update("Prodi", payload.get("Prodi"))
+    add_update("Password_Mahasiswa", payload.get("Password_Mahasiswa"))
+    add_update("Alamat", payload.get("Alamat"))
+    add_update("Nomor_Telepon", payload.get("Nomor_Telepon"))
+    add_update("Email", payload.get("Email"))
+    add_update("Deskripsi", payload.get("Deskripsi"))
+    add_update("created_by", payload.get("created_by"))
+
+    if not updates:
+        return {"success": True}
+
+    update_sql = text(f"UPDATE mahasiswa SET {', '.join(updates)} WHERE ID_Mahasiswa = :id_mahasiswa")
+    db.execute(update_sql, values)
     db.commit()
     return {"success": True}
 
@@ -250,17 +316,15 @@ def list_riwayat(db: Session = Depends(get_db)):
     mapping = {1: "Introvert", 2: "Ekstrovert", 3: "Ambivert"}
     result = []
     for hasil in rows:
-        mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == hasil.ID_Mahasiswa).first()
-        # safe prodi access (may not exist in DB)
-        prodi = getattr(mahasiswa, 'Prodi', None) if mahasiswa is not None else None
-        prodi = prodi if prodi not in (None, '') else '-'
+        mahasiswa = _mahasiswa_select_row(db, hasil.ID_Mahasiswa)
+        prodi = mahasiswa.get("Prodi", "-") if mahasiswa else '-'
         # compute skor from DetailTes (sum of Jawaban_Mahasiswa)
         skor_sum = db.query(func.sum(DetailTes.Jawaban_Mahasiswa)).filter(DetailTes.ID_Hasil == hasil.ID_Hasil).scalar()
         skor = int(skor_sum) if skor_sum is not None else 0
         result.append({
             "id_hasil": hasil.ID_Hasil,
-            "nim": int(mahasiswa.NIM) if mahasiswa and mahasiswa.NIM is not None else None,
-            "nama": mahasiswa.Nama_Mahasiswa if mahasiswa else '-',
+            "nim": int(mahasiswa["NIM"]) if mahasiswa and mahasiswa.get("NIM") is not None else None,
+            "nama": mahasiswa.get("Nama_Mahasiswa") if mahasiswa else '-',
             "prodi": prodi,
             "tanggal": hasil.Waktu_Selesai_Tes.isoformat() if hasil.Waktu_Selesai_Tes else None,
             "skor": skor,
@@ -292,7 +356,13 @@ def get_admin_profile(db: Session = Depends(get_db)):
     admin = db.query(Admin).order_by(Admin.ID_Admin).first()
     if not admin:
         raise HTTPException(status_code=404, detail="Admin not found")
-    return {"id": admin.ID_Admin, "username": admin.Username_Admin, "email": admin.Email}
+    return {
+        "id": admin.ID_Admin,
+        "nama": admin.Username_Admin,
+        "username": admin.Username_Admin,
+        "email": admin.Email,
+        "fullFakultas": "Matematika dan Ilmu Pengetahuan Alam",
+    }
 
 
 @router.put("/api/admin/profile")

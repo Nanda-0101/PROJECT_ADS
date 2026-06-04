@@ -5,6 +5,11 @@ body {
 
 /* LEFT */
 .left-section {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('/static/assets/BannerLanding.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     background-color: #7b97b2;
     color: white;
     height: 100vh;

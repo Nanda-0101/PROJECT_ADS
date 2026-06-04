@@ -208,6 +208,49 @@ function bukaModalHapusStatis(idMahasiswa) {
     }
 }
 
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    document.querySelectorAll(".btn-hapus-admin")
+    .forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const idAdmin = btn.dataset.id;
+
+            if (!confirm("Yakin ingin menghapus admin ini?")) {
+                return;
+            }
+
+            fetch(`/kelola-admin/${idAdmin}`, {
+                method: "DELETE"
+            })
+            .then(res => {
+
+                if (!res.ok) {
+                    throw new Error("Gagal menghapus admin");
+                }
+
+                return res.json();
+            })
+            .then(() => {
+
+                btn.closest("tr").remove();
+
+            })
+            .catch(err => {
+
+                console.error(err);
+                alert("Gagal menghapus admin");
+
+            });
+
+        });
+
+    });
+
+});
+
 // Tambah mahasiswa
 function tambahMahasiswa(nim, nama, password) {
     let newId = mahasiswaList.length > 0 ? Math.max(...mahasiswaList.map(m => m.id)) + 1 : 1;

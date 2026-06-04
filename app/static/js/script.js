@@ -38,7 +38,6 @@ toggle.addEventListener("click", () => {
     }
 });
 
-
 forgotLink.addEventListener("click", function(e){
     e.preventDefault();
     alert("Fitur lupa password belum tersedia");

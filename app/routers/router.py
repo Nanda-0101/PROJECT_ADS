@@ -9,13 +9,13 @@ from sqlalchemy import func
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
 from app.models.mahasiswa import Mahasiswa
-from app.schemas.auth import LoginRequest, LoginResponse
 
 from app.models.tes import Tes
 from app.models.bank_soal import BankSoal
 from app.models.hasil_tes import HasilTes
 from app.models.detail_tes import DetailTes
 from app.models.jenis_hasil_tes import JenisHasilTes
+from app.models.admin import Admin
 
 from app.services.huggingface_service import predict_kepribadian
 
@@ -274,6 +274,24 @@ async def admin_kelola_mahasiswa(request: Request):
     return templates.TemplateResponse(
         "admin_KelolaMahasiswa.html", 
         {"request": request}
+    )
+
+
+@router.get("/admin/kelola-admin", response_class=HTMLResponse)
+async def admin_kelola_admin(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    admins = db.query(Admin).all()
+
+    print(admins)
+
+    return templates.TemplateResponse(
+        "admin_KelolaAdmin.html",
+        {
+            "request": request,
+            "admins": admins
+        }
     )
 
 @router.get("/admin/riwayat-tes", response_class=HTMLResponse)

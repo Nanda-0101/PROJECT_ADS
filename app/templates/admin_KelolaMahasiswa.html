@@ -65,21 +65,11 @@
                 <th>ID</th>
                 <th>NIM</th>
                 <th>Nama</th>
+                <th>Prodi</th>
                 <th style="border-right: none !important;">Aksi</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td class="col-id">001</td>
-                <td class="col-nim">2408561140</td>
-                <td class="col-nama">Anak Agung Nanda Aditya</td>
-                <td class="col-aksi">
-                    <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn-hapus-custom" onclick="bukaModalHapusStatis(1)">Hapus</button>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
+        <tbody></tbody>
     </table>
 </div>
 <div class="modal fade" id="modalTambahMahasiswa" tabindex="-1">
@@ -98,6 +88,10 @@
         <div class="mb-3">
             <label class="form-label small fw-bold">Nama Mahasiswa</label>
             <input type="text" class="form-control" id="namaBaru" placeholder="Masukkan Nama Lengkap" required>
+        </div>
+        <div class="mb-4">
+            <label class="form-label small fw-bold">Prodi</label>
+            <input type="text" class="form-control" id="prodiBaru" placeholder="Masukkan Program Studi">
         </div>
         <div class="mb-4">
             <label class="form-label small fw-bold">Kata Sandi</label>

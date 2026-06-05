@@ -37,7 +37,7 @@
         </div>
         <button class="logout-btn" id="logoutBtn">Logout</button>
     </header>
-    <div id="page-dashboard" class="hidden">
+    <div id="page-dashboard">
         <div class="row g-4">
             <div class="col-md-6">
                 <div class="dashboard-card">
@@ -81,9 +81,11 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-4"><div class="col-12"><div class="card-ringkasan p-4 rounded-4 shadow-sm"><div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-2 mb-3"><div><h5 class="fw-bold mb-1"><i class="material-icons me-2">donut_large</i>Grafik Hasil Tes Mahasiswa</h5><p class="mb-0 text-muted">Distribusi hasil Introvert, Ekstrovert, dan Ambivert dari data tersimpan.</p></div></div><div class="row align-items-center g-4"><div class="col-lg-5"><div class="p-3 rounded-4 bg-white border h-100"><h6 class="fw-bold mb-3">Ringkasan Cepat</h6><ul class="list-unstyled mb-0"><li class="d-flex justify-content-between py-2 border-bottom"><span>Introvert</span><strong id="chartCountIntrovert">0</strong></li><li class="d-flex justify-content-between py-2 border-bottom"><span>Ekstrovert</span><strong id="chartCountEkstrovert">0</strong></li><li class="d-flex justify-content-between py-2"><span>Ambivert</span><strong id="chartCountAmbivert">0</strong></li></ul></div></div><div class="col-lg-7"><div class="position-relative mx-auto" style="max-width: 360px; height: 320px;"><canvas id="chartKepribadianAdmin"></canvas><div id="chartEmptyState" class="position-absolute top-50 start-50 translate-middle text-center text-muted d-none">Belum ada data hasil tes untuk ditampilkan.</div></div></div></div></div></div></div>
     </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="../static/js/script_admin.js"></script>
 </body>
 </html>

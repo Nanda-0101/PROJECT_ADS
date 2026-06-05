@@ -1,9 +1,9 @@
 const requiredIds = [
-    'page-dashboard', 'page-riwayat', 'page-kelola', 'page-profil', 
-    'statTotalMahasiswa', 'statTotalTes', 'statTipeDominan', 
-    'kelolaTable', 'riwayatTable', 'btnTambahMahasiswa', 
-    'formTambahMahasiswa', 'nimBaru', 'namaBaru', 'passwordBaru', 
-    'detailTesBody', 'editProfilBtn', 'formEditProfil', 
+    'page-dashboard', 'page-riwayat', 'page-kelola', 'page-profil',
+    'statTotalMahasiswa', 'statTotalTes', 'statTipeDominan',
+    'kelolaTable', 'riwayatTable', 'btnTambahMahasiswa',
+    'formTambahMahasiswa', 'nimBaru', 'namaBaru', 'passwordBaru',
+    'detailTesBody', 'editProfilBtn', 'formEditProfil',
     'editUsername', 'editEmail', 'editPassword',
     'ubahSandiBtn', 'profilNama', 'profilNip', 'profilEmail', 'profilFakultas',
     'logoutBtn', 'confirmLogoutBtn', 'headerNip', 'modalEditProfil', 'modalTambahMahasiswa', 'modalDetailTes', 'logoutModal'
@@ -11,7 +11,7 @@ const requiredIds = [
 
 requiredIds.forEach(id => {
     if (!document.getElementById(id)) {
-        let dummyEl = document.createElement('div');
+        const dummyEl = document.createElement('div');
         dummyEl.id = id;
         dummyEl.style.display = 'none';
         document.body.appendChild(dummyEl);
@@ -19,6 +19,7 @@ requiredIds.forEach(id => {
 });
 
 let idMahasiswaYangAkanDihapus = null;
+
 function initAdminShell() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (sidebarContainer) {
@@ -37,20 +38,21 @@ function initAdminShell() {
     }
 
     function TampilkanHalamanJikaAsli(pageId) {
-        let p = document.getElementById(pageId);
+        const p = document.getElementById(pageId);
         if (p) {
             const apakahDummy = p.parentElement === document.body;
             if (!apakahDummy) {
-                riwayatTesList = raw.map(r => {
-                        return {
-                            id: Number(r.id ?? r.id_hasil ?? r.ID_Hasil ?? null),
-                            nim: r.nim ?? r.NIM ?? '-',
-                            nama: r.nama ?? r.Nama_Mahasiswa ?? '-',
-                            tanggal: r.tanggal ?? r.Tanggal ?? '-',
-                            skor: r.skor ?? r.Skor ?? '-',
-                            status: r.status ?? (r.id_jenis ? (r.id_jenis == 1 ? 'Introvert' : (r.id_jenis == 2 ? 'Ekstrovert' : 'Ambivert')) : 'Unknown')
-                        };
-                });
+                p.classList.remove('hidden');
+                p.style.display = 'block';
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (TampilkanHalamanJikaAsli('page-profil')) {
+        console.log('Halaman Profil Aktif');
+    } else if (TampilkanHalamanJikaAsli('page-dashboard')) {
         console.log('Halaman Dashboard Aktif');
     } else if (TampilkanHalamanJikaAsli('page-riwayat')) {
         console.log('Halaman Riwayat Aktif');

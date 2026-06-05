@@ -41,17 +41,16 @@ function initAdminShell() {
         if (p) {
             const apakahDummy = p.parentElement === document.body;
             if (!apakahDummy) {
-                p.classList.remove('hidden');
-                p.style.display = 'block';
-                return true;
-            }
-        }
-        return false;
-    }
-
-    if (TampilkanHalamanJikaAsli('page-profil')) {
-        console.log('Halaman Profil Aktif');
-    } else if (TampilkanHalamanJikaAsli('page-dashboard')) {
+                riwayatTesList = raw.map(r => {
+                        return {
+                            id: Number(r.id ?? r.id_hasil ?? r.ID_Hasil ?? null),
+                            nim: r.nim ?? r.NIM ?? '-',
+                            nama: r.nama ?? r.Nama_Mahasiswa ?? '-',
+                            tanggal: r.tanggal ?? r.Tanggal ?? '-',
+                            skor: r.skor ?? r.Skor ?? '-',
+                            status: r.status ?? (r.id_jenis ? (r.id_jenis == 1 ? 'Introvert' : (r.id_jenis == 2 ? 'Ekstrovert' : 'Ambivert')) : 'Unknown')
+                        };
+                });
         console.log('Halaman Dashboard Aktif');
     } else if (TampilkanHalamanJikaAsli('page-riwayat')) {
         console.log('Halaman Riwayat Aktif');
@@ -108,15 +107,14 @@ async function loadRiwayat() {
         // normalize incoming riwayat data to avoid undefined fields
         const raw = await fetchJSON('/api/riwayat');
         riwayatTesList = raw.map(r => {
-            return {
-                id: Number(r.id ?? r.id_hasil ?? r.ID_Hasil ?? null),
-                nim: r.nim ?? r.NIM ?? '-',
-                nama: r.nama ?? r.Nama_Mahasiswa ?? '-',
-                prodi: r.prodi ?? r.Prodi ?? '-',
-                tanggal: r.tanggal ?? r.Tanggal ?? '-',
-                skor: r.skor ?? r.Skor ?? '-',
-                status: r.status ?? (r.id_jenis ? (r.id_jenis == 1 ? 'Introvert' : (r.id_jenis == 2 ? 'Ekstrovert' : 'Ambivert')) : 'Unknown')
-            };
+                return {
+                    id: Number(r.id ?? r.id_hasil ?? r.ID_Hasil ?? null),
+                    nim: r.nim ?? r.NIM ?? '-',
+                    nama: r.nama ?? r.Nama_Mahasiswa ?? '-',
+                    tanggal: r.tanggal ?? r.Tanggal ?? '-',
+                    skor: r.skor ?? r.Skor ?? '-',
+                    status: r.status ?? (r.id_jenis ? (r.id_jenis == 1 ? 'Introvert' : (r.id_jenis == 2 ? 'Ekstrovert' : 'Ambivert')) : 'Unknown')
+                };
         });
         renderRiwayatTable();
         updateStatistik();
@@ -256,7 +254,7 @@ function renderRiwayatTable() {
     if (!riwayatTesList.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="8" class="py-4 text-muted">Belum ada data riwayat tes.</td>
+                <td colspan="7" class="py-4 text-muted">Belum ada data riwayat tes.</td>
             </tr>
         `;
         return;
@@ -271,7 +269,6 @@ function renderRiwayatTable() {
                 <td>${idx+1}</td>
                 <td class="col-nim">${escapeHtml(item.nim)}</td>
                 <td>${escapeHtml(item.nama)}</td>
-                <td>${escapeHtml(item.prodi)}</td>
                 <td>${escapeHtml(item.tanggal)}</td>
                 <td><strong>${escapeHtml(item.skor)}</strong></td>
                 <td><span class="status-badge ${statusClass}">${escapeHtml(status)}</span></td>
@@ -334,7 +331,6 @@ async function loadDetailRiwayat(idHasil, tesRingkas) {
             <div class="mb-3">
                 <p class="mb-1"><strong>NIM:</strong> ${escapeHtml(tesRingkas.nim)}</p>
                 <p class="mb-1"><strong>Nama:</strong> ${escapeHtml(tesRingkas.nama)}</p>
-                <p class="mb-1"><strong>Prodi:</strong> ${escapeHtml(tesRingkas.prodi)}</p>
                 <p class="mb-1"><strong>Tanggal:</strong> ${escapeHtml(tesRingkas.tanggal)}</p>
                 <p class="mb-0"><strong>Status:</strong> ${escapeHtml(tesRingkas.status)}</p>
             </div>
@@ -373,7 +369,7 @@ function renderKelolaTable() {
     if (!mahasiswaList.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="py-4 text-muted">Belum ada data mahasiswa.</td>
+                <td colspan="4" class="py-4 text-muted">Belum ada data mahasiswa.</td>
             </tr>
         `;
         return;
@@ -386,7 +382,6 @@ function renderKelolaTable() {
                 <td>${displayId}</td>
                 <td class="col-nim">${escapeHtml(m.nim)}</td>
                 <td>${escapeHtml(m.nama)}</td>
-                <td>${escapeHtml(m.prodi || '-')}</td>
                 <td>
                     <button class="btn-edit btn-edit-mhs" data-id="${m.id}">Edit</button>
                     <button class="btn-hapus-custom btn-hapus-mhs" data-id="${m.id}">Hapus</button>
@@ -411,8 +406,6 @@ function renderKelolaTable() {
             // reuse the tambah modal for editing
             document.getElementById('nimBaru').value = m.nim || '';
             document.getElementById('namaBaru').value = m.nama || '';
-            const prodiInput = document.getElementById('prodiBaru');
-            if (prodiInput) prodiInput.value = m.prodi || '';
             document.getElementById('passwordBaru').value = '';
             // store edit id on the form element
             const form = document.getElementById('formTambahMahasiswa');
@@ -445,7 +438,7 @@ function bukaModalHapusStatis(idMahasiswa) {
 }
 
 // Tambah mahasiswa
-async function tambahMahasiswa(nim, nama, prodi, password) {
+async function tambahMahasiswa(nim, nama, password) {
     await fetchJSON('/api/mahasiswa', {
         method: 'POST',
         headers: {
@@ -454,7 +447,6 @@ async function tambahMahasiswa(nim, nama, prodi, password) {
         body: JSON.stringify({
             NIM: nim,
             Nama_Mahasiswa: nama,
-            Prodi: prodi,
             Password_Mahasiswa: password
         })
     });
@@ -541,8 +533,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnTambahMhs.addEventListener('click', () => {
             document.getElementById('nimBaru').value = '';
             document.getElementById('namaBaru').value = '';
-            const prodiInput = document.getElementById('prodiBaru');
-            if (prodiInput) prodiInput.value = '';
             document.getElementById('passwordBaru').value = '';
             const form = document.getElementById('formTambahMahasiswa');
             if (form && form.dataset.editId) delete form.dataset.editId;
@@ -557,20 +547,19 @@ if(formTambahMhs) {
         e.preventDefault();
         let nim = document.getElementById('nimBaru').value.trim();
         let nama = document.getElementById('namaBaru').value.trim();
-        let prodi = document.getElementById('prodiBaru') ? document.getElementById('prodiBaru').value.trim() : '';
         let password = document.getElementById('passwordBaru').value.trim();
         if (!nim || !nama) {
             alert('NIM dan Nama harus diisi!');
             return;
         }
         const editId = formTambahMhs.dataset.editId ? Number(formTambahMhs.dataset.editId) : null;
-        if (editId) {
+            if (editId) {
             // update flow
             try {
                 await fetchJSON(`/api/mahasiswa/${editId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ NIM: nim, Nama_Mahasiswa: nama, Prodi: prodi || undefined, Password_Mahasiswa: password || undefined })
+                    body: JSON.stringify({ NIM: nim, Nama_Mahasiswa: nama, Password_Mahasiswa: password || undefined })
                 });
                 delete formTambahMhs.dataset.editId;
                 formTambahMhs.reset();
@@ -582,14 +571,14 @@ if(formTambahMhs) {
                 console.error('Gagal memperbarui mahasiswa:', err);
                 alert('Gagal memperbarui mahasiswa. Silakan coba lagi.');
             }
-        } else {
+            } else {
             // create flow
             if (password.trim() === '') {
                 alert('Password harus diisi saat menambah mahasiswa baru');
                 return;
             }
             try {
-                await tambahMahasiswa(nim, nama, prodi, password);
+                await tambahMahasiswa(nim, nama, password);
                 formTambahMhs.classList.add('d-none');
                 const successBox = document.getElementById('successBox');
                 if(successBox) {

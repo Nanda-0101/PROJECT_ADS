@@ -83,32 +83,34 @@ async def login(
     role: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    if role == "mahasiswa":
-        if not nim:
-            return templates.TemplateResponse("login.html", {"request": request, "error": "NIM harus diisi"})
-        auth_result = authenticate_mahasiswa(db, nim, password)
-        if auth_result and auth_result["success"]:
-            response = RedirectResponse(url="/mahasiswa/dashboard", status_code=HTTP_302_FOUND)
-            response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
-            response.set_cookie(key="user_role", value=auth_result["role"]) 
-            response.set_cookie(key="user_nama", value=auth_result["nama"])
-            return response
-        else:
+    try:
+        if role == "mahasiswa":
+            if not nim:
+                return templates.TemplateResponse("login.html", {"request": request, "error": "NIM harus diisi"})
+            auth_result = authenticate_mahasiswa(db, nim, password)
+            if auth_result and auth_result["success"]:
+                response = RedirectResponse(url="/mahasiswa/dashboard", status_code=HTTP_302_FOUND)
+                response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
+                response.set_cookie(key="user_role", value=auth_result["role"])
+                response.set_cookie(key="user_nama", value=auth_result["nama"])
+                return response
             return templates.TemplateResponse("login.html", {"request": request, "error": "NIM atau Password salah"})
-    elif role == "admin":
-        if not username:
-            return templates.TemplateResponse("login.html", {"request": request, "error": "Username harus diisi"})
-        auth_result = authenticate_admin(db, username, password)
-        if auth_result and auth_result["success"]:
-            response = RedirectResponse(url="/admin/dashboard", status_code=HTTP_302_FOUND)
-            response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
-            response.set_cookie(key="user_role", value=auth_result["role"]) 
-            response.set_cookie(key="user_nama", value=auth_result["nama"])
-            return response
-        else:
+
+        if role == "admin":
+            if not username:
+                return templates.TemplateResponse("login.html", {"request": request, "error": "Username harus diisi"})
+            auth_result = authenticate_admin(db, username, password)
+            if auth_result and auth_result["success"]:
+                response = RedirectResponse(url="/admin/dashboard", status_code=HTTP_302_FOUND)
+                response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
+                response.set_cookie(key="user_role", value=auth_result["role"])
+                response.set_cookie(key="user_nama", value=auth_result["nama"])
+                return response
             return templates.TemplateResponse("login.html", {"request": request, "error": "Username atau Password salah"})
-    else:
+
         return templates.TemplateResponse("login.html", {"request": request, "error": "Role tidak valid"})
+    except Exception as exc:
+        return templates.TemplateResponse("login.html", {"request": request, "error": f"Login error: {exc}"})
 
 
 # LOGOUT
@@ -129,7 +131,7 @@ async def mahasiswa_dashboard(request: Request, db: Session = Depends(get_db)):
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     user_id = int(user_id)
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == user_id).first()
+    mahasiswa = _mahasiswa_select_row(db, user_id)
     if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     riwayat_tes = db.query(HasilTes).filter(HasilTes.ID_Mahasiswa == user_id).order_by(HasilTes.Waktu_Selesai_Tes.desc()).all()
@@ -153,7 +155,7 @@ async def profil_mahasiswa(request: Request, msg_success: str = None, msg_error:
     user_id = request.cookies.get("user_id")
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
+    mahasiswa = _mahasiswa_select_row(db, int(user_id))
     return templates.TemplateResponse("Profil_Mahasiswa.html", {"request": request, "mahasiswa": mahasiswa, "msg_success": msg_success, "msg_error": msg_error})
 
 
@@ -163,15 +165,23 @@ async def update_profil_mahasiswa(request: Request, nama_mahasiswa: str = Form(.
     user_id = request.cookies.get("user_id")
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
+    mahasiswa = _mahasiswa_select_row(db, int(user_id))
     if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     try:
-        mahasiswa.Nama_Mahasiswa = nama_mahasiswa
-        mahasiswa.Email = email
-        mahasiswa.Biodata = biodata
+        update_fields = ["Nama_Mahasiswa = :nama_mahasiswa"]
+        values = {"id_mahasiswa": int(user_id), "nama_mahasiswa": nama_mahasiswa}
+        if email is not None:
+            update_fields.append("Email = :email")
+            values["email"] = email
+        if biodata is not None and "Biodata" in _mahasiswa_columns(db):
+            update_fields.append("Biodata = :biodata")
+            values["biodata"] = biodata
         if password_baru and password_baru.strip() != "":
-            mahasiswa.Password_Mahasiswa = password_baru
+            update_fields.append("Password_Mahasiswa = :password_baru")
+            values["password_baru"] = password_baru
+        update_sql = text(f"UPDATE mahasiswa SET {', '.join(update_fields)} WHERE ID_Mahasiswa = :id_mahasiswa")
+        db.execute(update_sql, values)
         db.commit()
         response = RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
         response.set_cookie(key="user_nama", value=nama_mahasiswa)
@@ -302,10 +312,10 @@ def update_mahasiswa(id_mahasiswa: int, payload: dict = Body(...), db: Session =
 
 @router.delete("/api/mahasiswa/{id_mahasiswa}")
 def delete_mahasiswa(id_mahasiswa: int, db: Session = Depends(get_db)):
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == id_mahasiswa).first()
+    mahasiswa = _mahasiswa_select_row(db, id_mahasiswa)
     if not mahasiswa:
         raise HTTPException(status_code=404, detail="Mahasiswa not found")
-    db.delete(mahasiswa)
+    db.execute(text("DELETE FROM mahasiswa WHERE ID_Mahasiswa = :id_mahasiswa"), {"id_mahasiswa": id_mahasiswa})
     db.commit()
     return {"success": True}
 
@@ -358,6 +368,7 @@ def get_admin_profile(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Admin not found")
     return {
         "id": admin.ID_Admin,
+        "nip": str(admin.ID_Admin),
         "nama": admin.Username_Admin,
         "username": admin.Username_Admin,
         "email": admin.Email,

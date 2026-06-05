@@ -141,7 +141,7 @@ async function loadAdminProfile() {
         profilAdmin = {
             nama: raw.nama ?? raw.username ?? '-',
             username: raw.username ?? raw.nama ?? '-',
-            nip: raw.nip ?? raw.id ?? '-',
+            nip: raw.nip ?? '-',
             email: raw.email ?? '-',
             fullFakultas: raw.fullFakultas ?? raw.fakultas ?? 'Matematika dan Ilmu Pengetahuan Alam'
         };
@@ -489,10 +489,10 @@ function showPage(pageId) {
 function updateProfilUI() {
     if(document.getElementById('profilNama')) document.getElementById('profilNama').innerText = profilAdmin.username || profilAdmin.nama || '-';
     if(document.getElementById('profilUsername')) document.getElementById('profilUsername').innerText = profilAdmin.username || profilAdmin.nama || '-';
-    if(document.getElementById('profilNip')) document.getElementById('profilNip').innerText = profilAdmin.nip || '-';
     if(document.getElementById('profilEmail')) document.getElementById('profilEmail').innerText = profilAdmin.email || '-';
     if(document.getElementById('profilFakultas')) document.getElementById('profilFakultas').innerText = profilAdmin.fullFakultas || 'Matematika dan Ilmu Pengetahuan Alam';
-    if(document.getElementById('headerNip')) document.getElementById('headerNip').innerText = `Akun Admin: ${profilAdmin.username || '-'}`;
+    if(document.getElementById('profilNip')) document.getElementById('profilNip').innerText = profilAdmin.nip || '-';
+    if(document.getElementById('headerNip')) document.getElementById('headerNip').innerText = profilAdmin.nip ? `NIP ${profilAdmin.nip}` : '';
 }
 
 async function editProfil(username, email, password) {

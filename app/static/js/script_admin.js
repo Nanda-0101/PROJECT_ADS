@@ -19,7 +19,7 @@ requiredIds.forEach(id => {
 });
 
 let idMahasiswaYangAkanDihapus = null;
-document.addEventListener("DOMContentLoaded", function() {
+function initAdminShell() {
     const sidebarContainer = document.getElementById('sidebar-container');
     if (sidebarContainer) {
         fetch('/api/navigasi')
@@ -58,7 +58,15 @@ document.addEventListener("DOMContentLoaded", function() {
     } else if (TampilkanHalamanJikaAsli('page-kelola')) {
         console.log('Halaman Kelola Aktif');
     }
-});
+}
+
+window.initAdminShell = initAdminShell;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdminShell);
+} else {
+    initAdminShell();
+}
 
 // ========== DATA (loaded from backend) ==========
 let mahasiswaList = [];

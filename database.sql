@@ -716,6 +716,7 @@ CREATE TABLE `mahasiswa` (
   `ID_Mahasiswa` int(11) NOT NULL,
   `NIM` bigint(20) NOT NULL,
   `Nama_Mahasiswa` varchar(100) NOT NULL,
+  `Prodi` varchar(100) DEFAULT NULL,
   `Password_Mahasiswa` varchar(255) NOT NULL,
   `Alamat` text DEFAULT NULL,
   `Nomor_Telepon` varchar(20) DEFAULT NULL,
@@ -728,11 +729,11 @@ CREATE TABLE `mahasiswa` (
 -- Dumping data for table `mahasiswa`
 --
 
-INSERT INTO `mahasiswa` (`ID_Mahasiswa`, `NIM`, `Nama_Mahasiswa`, `Password_Mahasiswa`, `Alamat`, `Nomor_Telepon`, `Email`, `Deskripsi`, `created_by`) VALUES
-(1, 2408561131, 'P. Made Hesa Dharma Putra', 'mahasiswa1', 'Jl. Pendidikan No. 123, Denpasar, Bali', '081234567890', 'hesa.putra@student.unud.ac.id', 'Mahasiswa semester 6, aktif dalam organisasi kampus, memiliki minat di bidang teknologi.', 1),
-(2, 2408561152, 'I Gede Andhika Pratama', 'mahasiswa2', 'Jl. Merdeka No. 45, Gianyar, Bali', '081298765432', 'andhika.pratama@student.unud.ac.id', 'Mahasiswa semester 6 yang aktif dalam berbagai kegiatan kemahasiswaan.', 1),
-(3, 2408561190, 'Andi Makarim', 'mahasiswa3', 'Jl. Sudirman No. 12, Jakarta Selatan', '081234567891', 'andi.makarim@student.unud.ac.id', 'Mahasiswa semester 4, aktif dalam kegiatan sosial dan memiliki minat di bidang seni.', 1),
-(4, 2408561198, 'Sanji Putra', 'mahasiswa4', 'Jl. Gatot Subroto No. 88, Surabaya', '081234567892', 'sanji.putra@student.unud.ac.id', 'Mahasiswa semester 4, aktif dalam organisasi kemahasiswaan dan kegiatan olahraga.', 1);
+INSERT INTO `mahasiswa` (`ID_Mahasiswa`, `NIM`, `Nama_Mahasiswa`, `Prodi`, `Password_Mahasiswa`, `Alamat`, `Nomor_Telepon`, `Email`, `Deskripsi`, `created_by`) VALUES
+(1, 2408561131, 'P. Made Hesa Dharma Putra', NULL, 'mahasiswa1', 'Jl. Pendidikan No. 123, Denpasar, Bali', '081234567890', 'hesa.putra@student.unud.ac.id', 'Mahasiswa semester 6, aktif dalam organisasi kampus, memiliki minat di bidang teknologi.', 1),
+(2, 2408561152, 'I Gede Andhika Pratama', NULL, 'mahasiswa2', 'Jl. Merdeka No. 45, Gianyar, Bali', '081298765432', 'andhika.pratama@student.unud.ac.id', 'Mahasiswa semester 6 yang aktif dalam berbagai kegiatan kemahasiswaan.', 1),
+(3, 2408561190, 'Andi Makarim', NULL, 'mahasiswa3', 'Jl. Sudirman No. 12, Jakarta Selatan', '081234567891', 'andi.makarim@student.unud.ac.id', 'Mahasiswa semester 4, aktif dalam kegiatan sosial dan memiliki minat di bidang seni.', 1),
+(4, 2408561198, 'Sanji Putra', NULL, 'mahasiswa4', 'Jl. Gatot Subroto No. 88, Surabaya', '081234567892', 'sanji.putra@student.unud.ac.id', 'Mahasiswa semester 4, aktif dalam organisasi kemahasiswaan dan kegiatan olahraga.', 1);
 
 -- --------------------------------------------------------
 

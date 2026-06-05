@@ -26,7 +26,7 @@
     </div>
   </div>
 </div>
-<aside class="sidebar" id="sidebar-container"></aside>
+<aside class="sidebar" id="sidebar-container">{% include "admin_Navigasi.html" %}</aside>
 <main class="main-content">
     <header class="top-nav">
         <div class="admin-info">
@@ -111,6 +111,11 @@
     </button>
 </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../static/js/script_admin.js"></script>
+    <script src="../static/js/script_admin.js?v=20260605"></script>
+    <script>
+        if (window.initAdminShell) {
+            window.initAdminShell();
+        }
+    </script>
 </body>
 </html>

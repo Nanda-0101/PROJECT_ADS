@@ -1,23 +1,27 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.models.mahasiswa import Mahasiswa
 from app.models.admin import Admin
 
 def authenticate_mahasiswa(db: Session, nim: str, password: str):
     """Autentikasi mahasiswa berdasarkan NIM dan Password"""
     try:
-        # Convert nim to int if possible
         nim_int = int(nim) if nim.isdigit() else None
-        
-        mahasiswa = db.query(Mahasiswa).filter(
-            Mahasiswa.NIM == nim_int
-        ).first()
-        
-        if mahasiswa and mahasiswa.Password_Mahasiswa == password:
+
+        mahasiswa = db.execute(
+            text(
+                "SELECT ID_Mahasiswa, NIM, Nama_Mahasiswa, Password_Mahasiswa "
+                "FROM mahasiswa WHERE NIM = :nim LIMIT 1"
+            ),
+            {"nim": nim_int}
+        ).mappings().first()
+
+        if mahasiswa and mahasiswa["Password_Mahasiswa"] == password:
             return {
                 "success": True,
                 "role": "mahasiswa",
-                "nama": mahasiswa.Nama_Mahasiswa,
-                "user_id": mahasiswa.ID_Mahasiswa
+                "nama": mahasiswa["Nama_Mahasiswa"],
+                "user_id": mahasiswa["ID_Mahasiswa"]
             }
         return None
     except Exception as e:

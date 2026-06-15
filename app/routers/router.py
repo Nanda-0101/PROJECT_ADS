@@ -1,15 +1,14 @@
-# app/routers/router.py
-from fastapi import APIRouter, Request, Depends, HTTPException, Form
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, Form, Body
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy import func, inspect, text
 from starlette.status import HTTP_302_FOUND
-from sqlalchemy import func 
 
 from app.core.database import get_db
 from app.core.auth_utils import authenticate_mahasiswa, authenticate_admin
 from app.models.mahasiswa import Mahasiswa
-
+from app.models.admin import Admin
 from app.models.tes import Tes
 from app.models.bank_soal import BankSoal
 from app.models.hasil_tes import HasilTes
@@ -20,25 +19,56 @@ from app.models.admin import Admin
 from app.services.huggingface_service import predict_kepribadian
 
 from datetime import datetime
-from fastapi.responses import JSONResponse
 
 router = APIRouter()
-
 templates = Jinja2Templates(directory="app/templates")
 
 
-# PAGE ROUTES
+def _mahasiswa_columns(db: Session) -> set[str]:
+    return {column["name"] for column in inspect(db.get_bind()).get_columns("mahasiswa")}
 
+
+def _mahasiswa_select_row(db: Session, id_mahasiswa: int):
+    columns = [
+        "ID_Mahasiswa",
+        "NIM",
+        "Nama_Mahasiswa",
+        "Password_Mahasiswa",
+        "Alamat",
+        "Nomor_Telepon",
+        "Email",
+        "Deskripsi",
+        "created_by",
+    ]
+    available_columns = [column for column in columns if column in _mahasiswa_columns(db)]
+    sql = text(f"SELECT {', '.join(available_columns)} FROM mahasiswa WHERE ID_Mahasiswa = :id_mahasiswa")
+    return db.execute(sql, {"id_mahasiswa": id_mahasiswa}).mappings().first()
+
+
+def _mahasiswa_all_rows(db: Session):
+    columns = [
+        "ID_Mahasiswa",
+        "NIM",
+        "Nama_Mahasiswa",
+        "Password_Mahasiswa",
+        "Alamat",
+        "Nomor_Telepon",
+        "Email",
+        "Deskripsi",
+        "created_by",
+    ]
+    available_columns = [column for column in columns if column in _mahasiswa_columns(db)]
+    sql = text(f"SELECT {', '.join(available_columns)} FROM mahasiswa ORDER BY ID_Mahasiswa ASC")
+    return db.execute(sql).mappings().all()
+
+
+# PAGE ROUTES
 @router.get("/", response_class=HTMLResponse)
 async def login_page(request: Request):
-    return templates.TemplateResponse(
-        "login.html",
-        {"request": request}
-    )
+    return templates.TemplateResponse("login.html", {"request": request})
 
 
 # LOGIN ENDPOINT
-
 @router.post("/login")
 async def login(
     request: Request,
@@ -48,70 +78,39 @@ async def login(
     role: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    """Endpoint untuk login mahasiswa atau admin"""
-    
-    if role == "mahasiswa":
-        if not nim:
-            return templates.TemplateResponse(
-                "login.html",
-                {"request": request, "error": "NIM harus diisi"}
-            )
-        
-        auth_result = authenticate_mahasiswa(db, nim, password)
-        
-        if auth_result and auth_result["success"]:
-            # Set session or redirect
-            response = RedirectResponse(
-                url="/mahasiswa/dashboard",
-                status_code=HTTP_302_FOUND
-            )
-            # Set cookie session 
-            response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
-            response.set_cookie(key="user_role", value=auth_result["role"])
-            response.set_cookie(key="user_nama", value=auth_result["nama"])
-            return response
-        else:
-            return templates.TemplateResponse(
-                "login.html",
-                {"request": request, "error": "NIM atau Password salah"}
-            )
-    
-    elif role == "admin":
-        if not username:
-            return templates.TemplateResponse(
-                "login.html",
-                {"request": request, "error": "Username harus diisi"}
-            )
-        
-        auth_result = authenticate_admin(db, username, password)
-        
-        if auth_result and auth_result["success"]:
-            response = RedirectResponse(
-                url="/admin/dashboard",
-                status_code=HTTP_302_FOUND
-            )
-            response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
-            response.set_cookie(key="user_role", value=auth_result["role"])
-            response.set_cookie(key="user_nama", value=auth_result["nama"])
-            return response
-        else:
-            return templates.TemplateResponse(
-                "login.html",
-                {"request": request, "error": "Username atau Password salah"}
-            )
-    
-    else:
-        return templates.TemplateResponse(
-            "login.html",
-            {"request": request, "error": "Role tidak valid"}
-        )
+    try:
+        if role == "mahasiswa":
+            if not nim:
+                return templates.TemplateResponse("login.html", {"request": request, "error": "NIM harus diisi"})
+            auth_result = authenticate_mahasiswa(db, nim, password)
+            if auth_result and auth_result["success"]:
+                response = RedirectResponse(url="/mahasiswa/dashboard", status_code=HTTP_302_FOUND)
+                response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
+                response.set_cookie(key="user_role", value=auth_result["role"])
+                response.set_cookie(key="user_nama", value=auth_result["nama"])
+                return response
+            return templates.TemplateResponse("login.html", {"request": request, "error": "NIM atau Password salah"})
+
+        if role == "admin":
+            if not username:
+                return templates.TemplateResponse("login.html", {"request": request, "error": "Username harus diisi"})
+            auth_result = authenticate_admin(db, username, password)
+            if auth_result and auth_result["success"]:
+                response = RedirectResponse(url="/admin/dashboard", status_code=HTTP_302_FOUND)
+                response.set_cookie(key="user_id", value=str(auth_result["user_id"]))
+                response.set_cookie(key="user_role", value=auth_result["role"])
+                response.set_cookie(key="user_nama", value=auth_result["nama"])
+                return response
+            return templates.TemplateResponse("login.html", {"request": request, "error": "Username atau Password salah"})
+
+        return templates.TemplateResponse("login.html", {"request": request, "error": "Role tidak valid"})
+    except Exception as exc:
+        return templates.TemplateResponse("login.html", {"request": request, "error": f"Login error: {exc}"})
 
 
 # LOGOUT
-
 @router.get("/logout")
 async def logout():
-    """Logout user"""
     response = RedirectResponse(url="/", status_code=HTTP_302_FOUND)
     response.delete_cookie("user_id")
     response.delete_cookie("user_role")
@@ -120,161 +119,331 @@ async def logout():
 
 
 # DASHBOARD ROUTES
-
 @router.get("/mahasiswa/dashboard", response_class=HTMLResponse)
 async def mahasiswa_dashboard(request: Request, db: Session = Depends(get_db)):
-    # 1. Validasi Auth Cookie Session
     user_role = request.cookies.get("user_role")
     user_id = request.cookies.get("user_id")
-    
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
     user_id = int(user_id)
-
-    # 2. Ambil data lengkap objek Mahasiswa berdasarkan ID yang login
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == user_id).first()
+    mahasiswa = _mahasiswa_select_row(db, user_id)
     if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    riwayat_tes = db.query(HasilTes).filter(HasilTes.ID_Mahasiswa == user_id).order_by(HasilTes.Waktu_Selesai_Tes.desc()).all()
+    statistik = db.query(JenisHasilTes.Hasil, func.count(HasilTes.ID_Hasil)).join(HasilTes, JenisHasilTes.ID_Jenis == HasilTes.ID_Jenis).filter(HasilTes.ID_Mahasiswa == user_id).group_by(JenisHasilTes.Hasil).all()
+    grafik_labels = [row[0] for row in statistik]
+    grafik_data = [row[1] for row in statistik]
+    return templates.TemplateResponse("DashMhs.html", {"request": request, "mahasiswa": mahasiswa, "riwayat_tes": riwayat_tes, "grafik_labels": grafik_labels, "grafik_data": grafik_data})
 
-    # 3. Ambil list riwayat tes mahasiswa ini (di-join dengan tabel jenis_hasil_tes)
-    riwayat_tes = db.query(HasilTes).filter(HasilTes.ID_Mahasiswa == user_id)\
-        .order_by(HasilTes.Waktu_Selesai_Tes.desc()).all()
-
-    # 4. Hitung statistik untuk Grafik Lingkaran (Pie Chart)
-    # Menghitung berapa kali mahasiswa ini mendapatkan hasil Introvert, Ekstrovert, atau Ambivert
-    statistik = db.query(JenisHasilTes.Hasil, func.count(HasilTes.ID_Hasil))\
-        .join(HasilTes, JenisHasilTes.ID_Jenis == HasilTes.ID_Jenis)\
-        .filter(HasilTes.ID_Mahasiswa == user_id)\
-        .group_by(JenisHasilTes.Hasil).all()
-
-    # Ekstrak hasil query statistik menjadi list untuk Chart.js
-    grafik_labels = [row[0] for row in statistik]  # Contoh: ['Introvert', 'Ekstrovert']
-    grafik_data = [row[1] for row in statistik]    # Contoh: [3, 1]
-
-    # 5. Kembalikan semua data ke file HTML lewat Jinja2 Context
-    return templates.TemplateResponse(
-        "DashMhs.html",
-        {
-            "request": request,
-            "mahasiswa": mahasiswa,        # Mengirimkan objek mahasiswa (Menghapus error Undefined)
-            "riwayat_tes": riwayat_tes,    # Mengirimkan list riwayat tes dinamis
-            "grafik_labels": grafik_labels,# Label tipe kepribadian untuk grafik
-            "grafik_data": grafik_data     # Total angka kemunculan untuk grafik
-        }
-    )
 
 @router.get("/mahasiswa/tes", response_class=HTMLResponse)
 async def mahasiswa_tes(request: Request):
-    # Check if user is logged in as mahasiswa
     user_role = request.cookies.get("user_role")
     if user_role != "mahasiswa":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
-    return templates.TemplateResponse(
-        "Tes_Mahasiswa.html",
-        {
-            "request": request,
-            "nama": request.cookies.get("user_nama", "Mahasiswa")
-        }
-    )
+    return templates.TemplateResponse("Tes_Mahasiswa.html", {"request": request, "nama": request.cookies.get("user_nama", "Mahasiswa")})
 
 
-
-# 1. PERBARUI ENDPOINT GET PROFIL (Ubah agar mengambil data dari Database)
 @router.get("/mahasiswa/profil", response_class=HTMLResponse)
-async def profil_mahasiswa(
-    request: Request, 
-    msg_success: str = None, 
-    msg_error: str = None, 
-    db: Session = Depends(get_db)
-):
+async def profil_mahasiswa(request: Request, msg_success: str = None, msg_error: str = None, db: Session = Depends(get_db)):
     user_role = request.cookies.get("user_role")
     user_id = request.cookies.get("user_id")
-    
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
-    # Ambil data mahasiswa terupdate dari database
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
-    
-    return templates.TemplateResponse(
-        "Profil_Mahasiswa.html", 
-        {
-            "request": request,
-            "mahasiswa": mahasiswa,
-            "msg_success": msg_success,
-            "msg_error": msg_error
-        }
-    )
+    mahasiswa = _mahasiswa_select_row(db, int(user_id))
+    return templates.TemplateResponse("Profil_Mahasiswa.html", {"request": request, "mahasiswa": mahasiswa, "msg_success": msg_success, "msg_error": msg_error})
 
 
-# 2. TAMBAHKAN ENDPOINT POST BARU INI TEPAT DI BAWAHNYA UNTUK PROSES EDIT DATA
 @router.post("/mahasiswa/profil/update")
-async def update_profil_mahasiswa(
-    request: Request,
-    nama_mahasiswa: str = Form(...),
-    email: str = Form(None),
-    biodata: str = Form(None),
-    password_baru: str = Form(None),
-    db: Session = Depends(get_db)
-):
+async def update_profil_mahasiswa(request: Request, nama_mahasiswa: str = Form(...), email: str = Form(None), biodata: str = Form(None), password_baru: str = Form(None), db: Session = Depends(get_db)):
     user_role = request.cookies.get("user_role")
     user_id = request.cookies.get("user_id")
-    
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-        
-    mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == int(user_id)).first()
+    mahasiswa = _mahasiswa_select_row(db, int(user_id))
     if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
     try:
-        # Update Biodata Dasar
-        mahasiswa.Nama_Mahasiswa = nama_mahasiswa
-        mahasiswa.Email = email
-        mahasiswa.Biodata = biodata
-        
-        # Update Password jika user mengisi kolom password baru
+        update_fields = ["Nama_Mahasiswa = :nama_mahasiswa"]
+        values = {"id_mahasiswa": int(user_id), "nama_mahasiswa": nama_mahasiswa}
+        if email is not None:
+            update_fields.append("Email = :email")
+            values["email"] = email
+        if biodata is not None and "Biodata" in _mahasiswa_columns(db):
+            update_fields.append("Biodata = :biodata")
+            values["biodata"] = biodata
         if password_baru and password_baru.strip() != "":
-            # Catatan: Jika sistem Anda menggunakan hashing (misal: bcrypt), lakukan hash di sini:
-            # dari app.core.auth_utils import hash_password
-            # mahasiswa.Password_Mahasiswa = hash_password(password_baru)
-            mahasiswa.Password_Mahasiswa = password_baru
-            
+            update_fields.append("Password_Mahasiswa = :password_baru")
+            values["password_baru"] = password_baru
+        update_sql = text(f"UPDATE mahasiswa SET {', '.join(update_fields)} WHERE ID_Mahasiswa = :id_mahasiswa")
+        db.execute(update_sql, values)
         db.commit()
-        
-        # Redirect kembali ke profil dengan membawa pesan sukses
         response = RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
-        # Perbarui cookie nama panggillan top bar agar langsung tersinkronisasi
         response.set_cookie(key="user_nama", value=nama_mahasiswa)
         return response
-
-    except Exception as e:
+    except Exception:
         db.rollback()
         return RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
+
 
 @router.get("/admin/dashboard", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
     user_role = request.cookies.get("user_role")
     if user_role != "admin":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
-    return templates.TemplateResponse(
-        "admin_dashboard.html",
-        {"request": request}
-    )
+    return templates.TemplateResponse("admin_dashboard.html", {"request": request})
+
 
 @router.get("/admin/kelola-mahasiswa", response_class=HTMLResponse)
 async def admin_kelola_mahasiswa(request: Request):
     user_role = request.cookies.get("user_role")
     if user_role != "admin":
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
-    
-    return templates.TemplateResponse(
-        "admin_KelolaMahasiswa.html", 
-        {"request": request}
+    return templates.TemplateResponse("admin_KelolaMahasiswa.html", {"request": request})
+
+
+@router.get("/admin/riwayat-tes", response_class=HTMLResponse)
+async def admin_riwayat_tes(request: Request):
+    user_role = request.cookies.get("user_role")
+    if user_role != "admin":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("admin_RiwayatTesMahasiswa.html", {"request": request})
+
+
+@router.get("/admin/profil", response_class=HTMLResponse)
+async def admin_profil(request: Request):
+    user_role = request.cookies.get("user_role")
+    if user_role != "admin":
+        return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+    return templates.TemplateResponse("Profil_Admin.html", {"request": request})
+
+
+# ---- Admin API: Mahasiswa CRUD, Riwayat, Dashboard, Admin profile ----
+
+@router.get("/api/mahasiswa")
+def list_mahasiswa(db: Session = Depends(get_db)):
+    rows = _mahasiswa_all_rows(db)
+    return [
+        {
+            "id": row["ID_Mahasiswa"],
+            "nim": int(row["NIM"]) if row.get("NIM") is not None else None,
+            "nama": row.get("Nama_Mahasiswa"),
+            "email": row.get("Email"),
+            "alamat": row.get("Alamat"),
+            "nomor_telepon": row.get("Nomor_Telepon"),
+            "deskripsi": row.get("Deskripsi"),
+            "created_by": row.get("created_by"),
+        }
+        for row in rows
+    ]
+
+
+@router.post("/api/mahasiswa", status_code=201)
+def create_mahasiswa(payload: dict = Body(...), db: Session = Depends(get_db)):
+    columns = _mahasiswa_columns(db)
+    fields = []
+    values = {}
+
+    def add_field(column_name: str, value):
+        if column_name in columns and value is not None:
+            fields.append(column_name)
+            values[column_name] = value
+
+    add_field("NIM", int(payload["NIM"]) if payload.get("NIM") is not None else None)
+    add_field("Nama_Mahasiswa", payload.get("Nama_Mahasiswa"))
+    add_field("Password_Mahasiswa", payload.get("Password_Mahasiswa"))
+    add_field("Alamat", payload.get("Alamat"))
+    add_field("Nomor_Telepon", payload.get("Nomor_Telepon"))
+    add_field("Email", payload.get("Email"))
+    add_field("Deskripsi", payload.get("Deskripsi"))
+    add_field("created_by", payload.get("created_by"))
+
+    if not fields:
+        raise HTTPException(status_code=400, detail="Tidak ada data yang dapat disimpan")
+
+    insert_sql = text(
+        f"INSERT INTO mahasiswa ({', '.join(fields)}) VALUES ({', '.join(f':{field}' for field in fields)})"
     )
+    result = db.execute(insert_sql, values)
+    db.commit()
+    inserted_id = result.lastrowid
+    return {"success": True, "id": inserted_id}
+
+
+@router.put("/api/mahasiswa/{id_mahasiswa}")
+def update_mahasiswa(id_mahasiswa: int, payload: dict = Body(...), db: Session = Depends(get_db)):
+    columns = _mahasiswa_columns(db)
+    existing = _mahasiswa_select_row(db, id_mahasiswa)
+    if not existing:
+        raise HTTPException(status_code=404, detail="Mahasiswa not found")
+    updates = []
+    values = {"id_mahasiswa": id_mahasiswa}
+
+    def add_update(column_name: str, value):
+        if column_name in columns and value is not None:
+            updates.append(f"{column_name} = :{column_name}")
+            values[column_name] = value
+
+    add_update("NIM", int(payload["NIM"]) if payload.get("NIM") is not None else None)
+    add_update("Nama_Mahasiswa", payload.get("Nama_Mahasiswa"))
+    add_update("Password_Mahasiswa", payload.get("Password_Mahasiswa"))
+    add_update("Alamat", payload.get("Alamat"))
+    add_update("Nomor_Telepon", payload.get("Nomor_Telepon"))
+    add_update("Email", payload.get("Email"))
+    add_update("Deskripsi", payload.get("Deskripsi"))
+    add_update("created_by", payload.get("created_by"))
+
+    if not updates:
+        return {"success": True}
+
+    update_sql = text(f"UPDATE mahasiswa SET {', '.join(updates)} WHERE ID_Mahasiswa = :id_mahasiswa")
+    db.execute(update_sql, values)
+    db.commit()
+    return {"success": True}
+
+
+@router.delete("/api/mahasiswa/{id_mahasiswa}")
+def delete_mahasiswa(id_mahasiswa: int, db: Session = Depends(get_db)):
+    mahasiswa = _mahasiswa_select_row(db, id_mahasiswa)
+    if not mahasiswa:
+        raise HTTPException(status_code=404, detail="Mahasiswa not found")
+    db.execute(text("DELETE FROM mahasiswa WHERE ID_Mahasiswa = :id_mahasiswa"), {"id_mahasiswa": id_mahasiswa})
+    db.commit()
+    return {"success": True}
+
+
+@router.get("/api/riwayat")
+def list_riwayat(db: Session = Depends(get_db)):
+    rows = db.query(HasilTes).order_by(HasilTes.ID_Hasil.desc()).all()
+    mapping = {1: "Introvert", 2: "Ekstrovert", 3: "Ambivert"}
+    result = []
+    for hasil in rows:
+        mahasiswa = _mahasiswa_select_row(db, hasil.ID_Mahasiswa)
+        result.append({
+            "id_hasil": hasil.ID_Hasil,
+            "nim": int(mahasiswa["NIM"]) if mahasiswa and mahasiswa.get("NIM") is not None else None,
+            "nama": mahasiswa.get("Nama_Mahasiswa") if mahasiswa else '-',
+            "tanggal": hasil.Waktu_Selesai_Tes.strftime("%d-%m-%Y %H:%M") if hasil.Waktu_Selesai_Tes else None,
+            "id_jenis": hasil.ID_Jenis,
+            "status": mapping.get(hasil.ID_Jenis, "Unknown"),
+        })
+    return result
+
+
+@router.get("/api/riwayat/{id_hasil}")
+def riwayat_detail(id_hasil: int, db: Session = Depends(get_db)):
+    rows = db.query(DetailTes, BankSoal).join(BankSoal, BankSoal.ID_Soal == DetailTes.ID_Soal).filter(DetailTes.ID_Hasil == id_hasil).order_by(DetailTes.ID_Soal).all()
+    return [{"id_soal": detail.ID_Soal, "pertanyaan": soal.Pertanyaan, "jawaban": detail.Jawaban_Mahasiswa} for detail, soal in rows]
+
+
+@router.get("/api/admin/summary")
+def admin_summary(db: Session = Depends(get_db)):
+    total_mahasiswa = db.query(func.count(Mahasiswa.ID_Mahasiswa)).scalar() or 0
+    total_tes = db.query(func.count(HasilTes.ID_Hasil)).scalar() or 0
+    counts = db.query(HasilTes.ID_Jenis, func.count(HasilTes.ID_Jenis)).group_by(HasilTes.ID_Jenis).all()
+    mapping = {1: "Introvert", 2: "Ekstrovert", 3: "Ambivert"}
+    by_type = {mapping.get(id_jenis, str(id_jenis)): jumlah for id_jenis, jumlah in counts if id_jenis is not None}
+    dominant = max(by_type, key=by_type.get) if by_type else None
+    return {"total_mahasiswa": total_mahasiswa, "total_tes": total_tes, "by_type": by_type, "dominant": dominant}
+
+
+@router.get("/api/admin/profile")
+def get_admin_profile(db: Session = Depends(get_db)):
+    admin = db.query(Admin).order_by(Admin.ID_Admin).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    return {
+        "id": admin.ID_Admin,
+        "nama": admin.Username_Admin,
+        "username": admin.Username_Admin,
+        "email": admin.Email,
+        "fullFakultas": "Matematika dan Ilmu Pengetahuan Alam",
+    }
+
+
+@router.put("/api/admin/profile")
+def update_admin_profile(payload: dict = Body(...), db: Session = Depends(get_db)):
+    admin = db.query(Admin).order_by(Admin.ID_Admin).first()
+    if not admin:
+        raise HTTPException(status_code=404, detail="Admin not found")
+    if payload.get("username") is not None:
+        admin.Username_Admin = payload["username"]
+    if payload.get("email") is not None:
+        admin.Email = payload["email"]
+    if payload.get("password"):
+        admin.Password_Admin = payload["password"]
+    db.commit()
+    return {"success": True}
+
+
+@router.get("/api/navigasi-mahasiswa")
+async def get_navigasi_mahasiswa():
+    return FileResponse("app/templates/Mahasiswa_Navigasi.html")
+
+
+@router.get("/api/navigasi")
+async def get_navigasi():
+    return FileResponse("app/templates/admin_Navigasi.html")
+
+
+# TEST DATABASE
+@router.get("/test-db")
+def test_db(db: Session = Depends(get_db)):
+    from app.models.mahasiswa import Mahasiswa
+    from app.models.admin import Admin
+    mahasiswa_count = db.query(Mahasiswa).count()
+    admin_count = db.query(Admin).count()
+    return {"status": "database connected", "mahasiswa_count": mahasiswa_count, "admin_count": admin_count}
+
+
+@router.get("/api/tes")
+def get_tes(db: Session = Depends(get_db)):
+    data = db.query(Tes).all()
+    return [{"id": tes.ID_Tes, "nama": tes.Nama_Tes} for tes in data]
+
+
+@router.get("/api/tes/{id_tes}/soal")
+def get_soal(id_tes: int, db: Session = Depends(get_db)):
+    soal = db.query(BankSoal).filter(BankSoal.ID_Tes == id_tes).all()
+    return [{"id": s.ID_Soal, "text": s.Pertanyaan} for s in soal]
+
+
+@router.post("/api/tes/submit")
+async def submit_tes(request: Request, db: Session = Depends(get_db)):
+    body = await request.json()
+    id_tes = body["id_tes"]
+    answers = body["answers"]
+    user_id = request.cookies.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="User belum login")
+    user_id = int(user_id)
+    hasil = HasilTes(ID_Mahasiswa=user_id, ID_Tes=id_tes, Waktu_Mulai_Tes=datetime.now(), Waktu_Selesai_Tes=datetime.now())
+    db.add(hasil)
+    db.commit()
+    db.refresh(hasil)
+    mapping_jawaban = {"STS": 1, "TS": 2, "N": 3, "S": 4, "SS": 5}
+    gender_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 1)
+    age_raw = next(item["jawaban"] for item in answers if item["id_soal"] == 2)
+    gender = int(gender_raw)
+    age = int(age_raw)
+    jawaban_ml = []
+    for item in answers:
+        if 3 <= item["id_soal"] <= 93:
+            nilai = mapping_jawaban.get(item["jawaban"], 3)
+            jawaban_ml.append(nilai)
+        if item["id_soal"] == 1 or item["id_soal"] == 2:
+            db.add(DetailTes(ID_Hasil=hasil.ID_Hasil, ID_Soal=item["id_soal"], Jawaban_Mahasiswa=int(item["jawaban"])))
+        else:
+            nilai_int = mapping_jawaban.get(item["jawaban"], 3)
+            db.add(DetailTes(ID_Hasil=hasil.ID_Hasil, ID_Soal=item["id_soal"], Jawaban_Mahasiswa=nilai_int))
+    if len(jawaban_ml) != 91:
+        raise HTTPException(status_code=400, detail=f"Jumlah jawaban ML harus 91, sekarang {len(jawaban_ml)}")
+    hasil_prediksi, probabilitas = predict_kepribadian(gender=gender, age=age, jawaban=jawaban_ml)
+    mapping = {"Introvert": 1, "Ekstrovert": 2, "Ambivert": 3}
+    hasil.ID_Jenis = mapping.get(hasil_prediksi, 3)
+    db.commit()
+    return {"success": True, "hasil": hasil_prediksi, "probabilities": probabilitas}
+
 
 
 @router.get("/admin/kelola-admin", response_class=HTMLResponse)

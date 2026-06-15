@@ -72,22 +72,23 @@ async def view_profil(
 @router.post("/profil/update")
 async def update_profil(
     request: Request,
-    nama: str = Form(...),
+    nama_mahasiswa: str = Form(...),
     alamat: str = Form(None),
     telepon: str = Form(None),
     email: str = Form(None),
-    deskripsi: str = Form(None), # Tambahan: menangkap Deskripsi dari database
+    deskripsi: str = Form(None),
     password_baru: str = Form(None),
     db: Session = Depends(get_db),
     mhs_id: int = Depends(get_current_mahasiswa_id)
 ):
+    print("UPDATE PROFIL DIPANGGIL")
     mahasiswa = db.query(Mahasiswa).filter(Mahasiswa.ID_Mahasiswa == mhs_id).first()
     if not mahasiswa:
         raise HTTPException(status_code=404, detail="Mahasiswa tidak ditemukan")
     
     try:
         # Update data berdasarkan nama kolom database asli Anda
-        mahasiswa.Nama_Mahasiswa = nama
+        mahasiswa.Nama_Mahasiswa = nama_mahasiswa
         mahasiswa.Alamat = alamat
         mahasiswa.Nomor_Telepon = telepon
         mahasiswa.Email = email

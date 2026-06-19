@@ -846,12 +846,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     async function submitTest(testId, allQuestions, answers) {
-        const unanswered = answers.filter(a => a === null || a === "").length;
-        
-        if (unanswered > 0) {
-            alert(`Anda belum menjawab ${unanswered} soal. Silakan lengkapi semua jawaban terlebih dahulu.`);
-            return;
-        }
+        const unanswered = [];
+
+        answers.forEach((answer, index) => {
+            if (answer === null || answer === "") {
+                unanswered.push(index + 1);
+            }
+        });
+    
+        if (unanswered.length > 0) {
+
+			const existing = document.getElementById("warning-unanswered");
+			if (existing) existing.remove();
+
+			const warning = document.createElement("div");
+
+			warning.id = "warning-unanswered";
+			warning.className = "alert alert-warning mt-3";
+
+			warning.innerHTML = `
+				<strong>${unanswered.length} soal belum dijawab</strong><br>
+				Nomor soal:
+				${unanswered.map(no =>
+					`<span class="badge bg-danger ms-1">${no}</span>`
+				).join("")}
+			`;
+
+			document.querySelector(".quiz-tracker-centered")
+				.appendChild(warning);
+
+			window.scrollTo({
+				top: 0,
+				behavior: "smooth"
+			});
+
+			return;
+		}
         
         if (!confirm('Apakah Anda yakin ingin mengirimkan tes? Pastikan semua jawaban sudah benar.')) {
             return;

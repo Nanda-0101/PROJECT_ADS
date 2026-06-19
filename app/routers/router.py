@@ -155,35 +155,74 @@ async def profil_mahasiswa(request: Request, msg_success: str = None, msg_error:
 
 
 @router.post("/mahasiswa/profil/update")
-async def update_profil_mahasiswa(request: Request, nama_mahasiswa: str = Form(...), email: str = Form(None), biodata: str = Form(None), password_baru: str = Form(None), db: Session = Depends(get_db)):
+async def update_profil_mahasiswa(
+    request: Request,
+    email: str = Form(None),
+    telepon: str = Form(None),
+    alamat: str = Form(None),
+    deskripsi: str = Form(None),
+    password_baru: str = Form(None),
+    db: Session = Depends(get_db)
+):
     user_role = request.cookies.get("user_role")
     user_id = request.cookies.get("user_id")
+
     if user_role != "mahasiswa" or not user_id:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
     mahasiswa = _mahasiswa_select_row(db, int(user_id))
     if not mahasiswa:
         return RedirectResponse(url="/", status_code=HTTP_302_FOUND)
+
     try:
-        update_fields = ["Nama_Mahasiswa = :nama_mahasiswa"]
-        values = {"id_mahasiswa": int(user_id), "nama_mahasiswa": nama_mahasiswa}
+        update_fields = []
+        values = {
+            "id_mahasiswa": int(user_id)
+        }
+
         if email is not None:
             update_fields.append("Email = :email")
             values["email"] = email
-        if biodata is not None and "Biodata" in _mahasiswa_columns(db):
-            update_fields.append("Biodata = :biodata")
-            values["biodata"] = biodata
-        if password_baru and password_baru.strip() != "":
+
+        if telepon is not None:
+            update_fields.append("Nomor_Telepon = :telepon")
+            values["telepon"] = telepon
+
+        if alamat is not None:
+            update_fields.append("Alamat = :alamat")
+            values["alamat"] = alamat
+
+        if deskripsi is not None:
+            update_fields.append("Deskripsi = :deskripsi")
+            values["deskripsi"] = deskripsi
+
+        if password_baru and password_baru.strip():
             update_fields.append("Password_Mahasiswa = :password_baru")
             values["password_baru"] = password_baru
-        update_sql = text(f"UPDATE mahasiswa SET {', '.join(update_fields)} WHERE ID_Mahasiswa = :id_mahasiswa")
-        db.execute(update_sql, values)
-        db.commit()
-        response = RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
-        response.set_cookie(key="user_nama", value=nama_mahasiswa)
-        return response
-    except Exception:
+
+        if update_fields:
+            update_sql = text(f"""
+                UPDATE mahasiswa
+                SET {', '.join(update_fields)}
+                WHERE ID_Mahasiswa = :id_mahasiswa
+            """)
+
+            db.execute(update_sql, values)
+            db.commit()
+
+        return RedirectResponse(
+            url="/mahasiswa/profil",
+            status_code=HTTP_302_FOUND
+        )
+
+    except Exception as e:
         db.rollback()
-        return RedirectResponse(url="/mahasiswa/profil", status_code=HTTP_302_FOUND)
+        print(f"Error update profil: {e}")
+
+        return RedirectResponse(
+            url="/mahasiswa/profil",
+            status_code=HTTP_302_FOUND
+        )
 
 
 @router.get("/admin/dashboard", response_class=HTMLResponse)

@@ -142,9 +142,17 @@
                                 <h6 class="fw-semibold mb-3 text-primary-blue">Ubah Biodata</h6>
                                 
                                 <div class="mb-3">
+                                    <label class="form-label small fw-medium text-muted">NIM</label>
+                                    <input type="text" class="form-control rounded-3" name="nama_mahasiswa" 
+                                           value="{{ mahasiswa.NIM }}" required
+                                           disabled>
+                                </div>
+
+                                <div class="mb-3">
                                     <label class="form-label small fw-medium text-muted">NAMA LENGKAP</label>
                                     <input type="text" class="form-control rounded-3" name="nama_mahasiswa" 
-                                           value="{{ mahasiswa.Nama_Mahasiswa }}" required>
+                                           value="{{ mahasiswa.Nama_Mahasiswa }}" required
+                                           disabled>
                                 </div>
 
                                 <div class="mb-3">

@@ -278,7 +278,27 @@ def list_mahasiswa(db: Session = Depends(get_db)):
 
 
 @router.post("/api/mahasiswa", status_code=201)
-def create_mahasiswa(payload: dict = Body(...), db: Session = Depends(get_db)):
+def create_mahasiswa(
+    request: Request,
+    payload: dict = Body(...),
+    db: Session = Depends(get_db)
+):
+    # Pastikan yang membuat akun adalah admin
+    user_role = request.cookies.get("user_role")
+    admin_id = request.cookies.get("user_id")
+
+    if user_role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Hanya admin yang dapat menambahkan mahasiswa"
+        )
+
+    if not admin_id:
+        raise HTTPException(
+            status_code=401,
+            detail="Admin belum login"
+        )
+
     columns = _mahasiswa_columns(db)
     fields = []
     values = {}
@@ -288,25 +308,71 @@ def create_mahasiswa(payload: dict = Body(...), db: Session = Depends(get_db)):
             fields.append(column_name)
             values[column_name] = value
 
-    add_field("NIM", int(payload["NIM"]) if payload.get("NIM") is not None else None)
-    add_field("Nama_Mahasiswa", payload.get("Nama_Mahasiswa"))
-    add_field("Password_Mahasiswa", payload.get("Password_Mahasiswa"))
-    add_field("Alamat", payload.get("Alamat"))
-    add_field("Nomor_Telepon", payload.get("Nomor_Telepon"))
-    add_field("Email", payload.get("Email"))
-    add_field("Deskripsi", payload.get("Deskripsi"))
-    add_field("created_by", payload.get("created_by"))
+    # Data mahasiswa
+    add_field(
+        "NIM",
+        int(payload["NIM"]) if payload.get("NIM") else None
+    )
+
+    add_field(
+        "Nama_Mahasiswa",
+        payload.get("Nama_Mahasiswa")
+    )
+
+    add_field(
+        "Password_Mahasiswa",
+        payload.get("Password_Mahasiswa")
+    )
+
+    add_field(
+        "Alamat",
+        payload.get("Alamat")
+    )
+
+    add_field(
+        "Nomor_Telepon",
+        payload.get("Nomor_Telepon")
+    )
+
+    add_field(
+        "Email",
+        payload.get("Email")
+    )
+
+    add_field(
+        "Deskripsi",
+        payload.get("Deskripsi")
+    )
+
+    # Otomatis isi admin pembuat akun
+    add_field(
+        "created_by",
+        int(admin_id)
+    )
 
     if not fields:
-        raise HTTPException(status_code=400, detail="Tidak ada data yang dapat disimpan")
+        raise HTTPException(
+            status_code=400,
+            detail="Tidak ada data yang dapat disimpan"
+        )
 
     insert_sql = text(
-        f"INSERT INTO mahasiswa ({', '.join(fields)}) VALUES ({', '.join(f':{field}' for field in fields)})"
+        f"""
+        INSERT INTO mahasiswa
+        ({', '.join(fields)})
+        VALUES
+        ({', '.join(f':{field}' for field in fields)})
+        """
     )
+
     result = db.execute(insert_sql, values)
     db.commit()
-    inserted_id = result.lastrowid
-    return {"success": True, "id": inserted_id}
+
+    return {
+        "success": True,
+        "id": result.lastrowid,
+        "created_by": int(admin_id)
+    }
 
 
 @router.put("/api/mahasiswa/{id_mahasiswa}")

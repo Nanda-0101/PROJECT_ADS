@@ -202,27 +202,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 12. Project Structure
-
-```
-app/
-│
-├── main.py
-│
-├── core/
-├── models/
-├── routers/
-├── services/
-│
-├── static/        # Vanilla JS frontend assets
-├── templates/     # HTML UI pages
-│
-└── utils/
-```
-
----
-
-## 13. AI Integration (Hugging Face)
+## 12. AI Integration (Hugging Face)
 
 Endpoint:
 ```
@@ -241,22 +221,7 @@ Fungsi:
 
 ---
 
-## 14. Database Schema
-
-- users
-- mahasiswa
-- admin
-- tes
-- hasil_tes
-
-Relasi:
-```
-Mahasiswa → Tes → Hasil Prediksi
-```
-
----
-
-## 15. Common Issues
+## 13. Common Issues
 
 ### ❌ Database Error
 - Pastikan MySQL aktif
@@ -285,7 +250,7 @@ uvicorn main:app --port 8001 --reload
 
 ---
 
-## 16. System Workflow
+## 14. System Workflow
 
 1. Login mahasiswa / admin
 2. Load UI (HTML + CSS)
@@ -297,7 +262,7 @@ uvicorn main:app --port 8001 --reload
 
 ---
 
-## 17. Notes
+## 15. Notes
 
 ✔ Python 3.11 wajib  
 ✔ Database harus di-import dulu  

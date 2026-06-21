@@ -1,55 +1,94 @@
-# SIPEKA - Sistem Prediksi Kepribadian Mahasiswa
+# 🎯 SIPEKA - Sistem Prediksi Kepribadian Mahasiswa
 
-:contentReference[oaicite:0]{index=0}
+<p align="center">
+  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi" />
+  <img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python" />
+  <img src="https://img.shields.io/badge/MySQL-Database-orange?style=for-the-badge&logo=mysql" />
+  <img src="https://img.shields.io/badge/ML-Ensemble-red?style=for-the-badge&logo=tensorflow" />
+</p>
 
-SIPEKA adalah aplikasi berbasis web untuk memprediksi kepribadian mahasiswa (Introvert, Ekstrovert, Ambivert) menggunakan pendekatan **Machine Learning Ensemble** yang terdiri dari:
+<p align="center">
+  <b>AI-Based Personality Prediction System for Students</b><br>
+  Introvert • Ekstrovert • Ambivert Classification using Machine Learning Ensemble
+</p>
 
+---
+
+## 🌐 Repository
+👉 :contentReference[oaicite:0]{index=0}
+
+---
+
+## ✨ Overview
+
+**SIPEKA** adalah sistem berbasis web yang digunakan untuk memprediksi kepribadian mahasiswa menggunakan pendekatan **Artificial Intelligence & Machine Learning Ensemble**.
+
+Sistem ini menggabungkan:
 - XGBoost
 - LightGBM
 - Neural Network
 
-Sistem dibangun menggunakan **FastAPI** sebagai backend, **MySQL** sebagai database, serta integrasi model AI melalui **Hugging Face Spaces**.
+dengan backend **FastAPI** dan database **MySQL**.
 
 ---
 
-## 🚀 Fitur Utama
+## 🚀 Key Features
 
 ### 👨‍🎓 Mahasiswa
-- Login pengguna
-- Mengisi tes kepribadian (93 pertanyaan)
-- Melihat hasil prediksi kepribadian
-- Riwayat hasil tes
-- Edit profil
-- Logout
+- 🔐 Login & autentikasi
+- 📝 Tes kepribadian (93 pertanyaan)
+- 📊 Hasil prediksi otomatis
+- 📚 Riwayat tes
+- 👤 Edit profil
+- 🚪 Logout
 
-### 🧑‍💼 Admin
-- Login admin
-- Manajemen data mahasiswa
-- Manajemen admin
-- Monitoring seluruh hasil tes
-- Statistik hasil prediksi
-- Edit profil admin
-- Logout
-
----
-
-## ⚙️ Teknologi yang Digunakan
-
-- Python 3.11
-- FastAPI
-- MySQL / MariaDB (XAMPP)
-- SQLAlchemy
-- PyMySQL
-- Machine Learning (XGBoost, LightGBM, Neural Network)
-- Hugging Face Inference API
-- Uvicorn
+### 🧑‍💼 Admin Panel
+- 🔐 Admin authentication
+- 👥 Manajemen mahasiswa
+- 🛠️ Manajemen admin
+- 📊 Statistik hasil tes
+- 📈 Monitoring data prediksi
+- ⚙️ Profil admin management
 
 ---
 
-## 📥 Instalasi & Setup Project
+## 🧠 Machine Learning Architecture
 
-### 1. Clone Repository
+```mermaid
+graph TD
+A[Jawaban Mahasiswa] --> B[Preprocessing]
+B --> C1[XGBoost Model]
+B --> C2[LightGBM Model]
+B --> C3[Neural Network]
+C1 --> D[Weighted Voting Ensemble]
+C2 --> D
+C3 --> D
+D --> E[Output: Personality Prediction]
+```
 
+### 🔬 Model Output
+- Introvert
+- Ekstrovert
+- Ambivert
+
+---
+
+## 🏗️ Tech Stack
+
+| Layer | Technology |
+|------|------------|
+| Backend | FastAPI ⚡ |
+| Database | MySQL 🗄️ |
+| ORM | SQLAlchemy |
+| ML Models | XGBoost • LightGBM • Neural Network |
+| API ML | Hugging Face Spaces 🤗 |
+| Server | Uvicorn |
+
+---
+
+## 📦 Installation Guide
+
+### 1️⃣ Clone Repository
 ```bash
 git clone https://github.com/Nanda-0101/PROJECT_ADS.git
 cd PROJECT_ADS
@@ -57,186 +96,131 @@ cd PROJECT_ADS
 
 ---
 
-### 2. Buat Virtual Environment
-
+### 2️⃣ Create Virtual Environment
 ```bash
 python -m venv ads
 ```
 
-Aktifkan environment:
-
-**Windows (PowerShell):**
+Activate:
 ```bash
 ads\Scripts\Activate.ps1
 ```
 
-**Windows (CMD):**
-```bash
-ads\Scripts\activate
-```
-
 ---
 
-### 3. Install Dependencies
-
+### 3️⃣ Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
 ---
 
-## 🗄️ Setup Database MySQL
+## 🗄️ Database Setup
 
-### 4.1 Buat Database
-
-Jalankan perintah berikut di MySQL / phpMyAdmin:
-
+### 4️⃣ Create Database
 ```sql
 CREATE DATABASE database;
 ```
 
----
-
-### 4.2 Import Struktur Database
-
-Import file `database.sql` yang tersedia di repository:
-
-Langkah:
-- Buka phpMyAdmin
-- Pilih database `database`
-- Klik tab **Import**
-- Upload file `database.sql`
-- Klik **Go**
+### 5️⃣ Import SQL File
+- Open phpMyAdmin
+- Select database `database`
+- Import `database.sql`
 
 ---
 
-## 🔐 Konfigurasi Environment (.env)
+## 🔐 Environment Configuration
 
-Buat file `.env` di root project:
+Create file `.env`:
 
 ```env
 DATABASE_URL=mysql+pymysql://root:@localhost:3306/database
 ```
 
-Jika MySQL menggunakan password:
-
+If password exists:
 ```env
 DATABASE_URL=mysql+pymysql://root:password@localhost:3306/database
 ```
 
-📌 Catatan penting:
-- File `.env` tidak disimpan di GitHub
-- Wajib dibuat manual sebelum menjalankan aplikasi
+⚠️ `.env` is NOT included in repository (must be created manually)
 
 ---
 
-## ▶️ Menjalankan Aplikasi
-
-Masuk ke folder aplikasi:
+## ▶️ Run Application
 
 ```bash
 cd app
-```
-
-Jalankan server FastAPI:
-
-```bash
 uvicorn main:app --reload
 ```
 
-Akses aplikasi di browser:
-
+🌍 Open in browser:
 ```
 http://127.0.0.1:8000
 ```
 
 ---
 
-## 🧠 Arsitektur Sistem
-
-### 📁 Backend (FastAPI)
-
-Struktur utama project:
+## 🧩 Project Structure
 
 ```
 app/
-│── main.py              # Entry point aplikasi
 │
-├── routers/            # API endpoint
+├── main.py
+├── routers/
 │   ├── auth.py
-│   ├── mahasiswa.py
 │   ├── admin.py
+│   ├── mahasiswa.py
 │   └── tes.py
 │
-├── models/             # Database model (SQLAlchemy)
-├── services/           # Integrasi ML (Hugging Face)
-├── core/               # Config database & security
-└── utils/              # Helper function
+├── models/
+├── services/      # ML + Hugging Face API
+├── core/          # DB config & security
+└── utils/
 ```
 
 ---
 
-## 🤖 Machine Learning System
+## 🤖 AI Integration (Hugging Face)
 
-SIPEKA menggunakan pendekatan **ensemble learning**, yaitu:
-
-- XGBoost → model boosting
-- LightGBM → gradient boosting framework
-- Neural Network → deep learning model
-
-### 🔄 Metode Prediksi
-Hasil akhir ditentukan menggunakan:
+📌 Model deployed on Hugging Face Space  
+📡 Communication via API:
 
 ```
-Weighted Ensemble Voting
+/predict
 ```
 
-Setiap model memberikan probabilitas, kemudian digabungkan untuk menentukan kelas akhir:
-
-- Introvert
-- Ekstrovert
-- Ambivert
-
----
-
-## 🌐 Integrasi Hugging Face
-
-Model tidak disimpan di GitHub, tetapi di-deploy di Hugging Face Space.
-
-File utama:
+File:
 ```
 huggingface_service.py
 ```
 
-Fungsi:
-- Mengirim data jawaban ke API `/predict`
-- Menerima hasil prediksi
-- Mengembalikan probabilitas + label kepribadian
+Function:
+- Send user answers
+- Receive probability scores
+- Return final classification
 
 ---
 
-## 📊 Database & Relasi
+## 📊 Database Schema
 
-Tabel utama:
 - users
 - mahasiswa
 - admin
 - tes
 - hasil_tes
 
-Relasi:
-- User → Mahasiswa/Admin
-- Mahasiswa → Tes
-- Tes → Hasil Prediksi
+Relasi utama:
+```
+Mahasiswa → Tes → Hasil Prediksi
+```
 
 ---
 
-## 📌 Troubleshooting
+## ⚠️ Common Issues
 
-### ❌ Error: Database Connection Failed
-- Pastikan MySQL aktif (XAMPP)
-- Cek `.env`
-- Pastikan database sudah dibuat
+### ❌ Database Error
+✔ Pastikan MySQL running  
+✔ Cek `.env`  
 
 ---
 
@@ -247,47 +231,62 @@ pip install -r requirements.txt
 
 ---
 
-### ❌ Uvicorn Tidak Jalan
+### ❌ Uvicorn Error
 ```bash
 pip install uvicorn
 ```
 
 ---
 
-### ❌ Port Sudah Dipakai
+### ❌ Port Conflict
 ```bash
 uvicorn main:app --port 8001 --reload
 ```
 
 ---
 
-## 🧪 Testing Aplikasi
+## 📌 System Workflow
 
-- Login sebagai mahasiswa
-- Isi tes 93 soal
-- Submit hasil
-- Cek hasil prediksi
-- Login admin untuk melihat statistik
-
----
-
-## 👨‍💻 Pengembang
-
-Proyek ini dikembangkan untuk tugas **Analisis Data System (ADS)** dengan integrasi:
-
-- FastAPI Backend
-- MySQL Database
-- Machine Learning Ensemble
-- Hugging Face Deployment
+1. Login mahasiswa
+2. Isi 93 pertanyaan
+3. Data dikirim ke ML API
+4. Ensemble model memproses
+5. Hasil ditampilkan ke user
+6. Admin memonitor hasil
 
 ---
 
-## 📌 Catatan Penting
+## 👨‍💻 Developer
 
-- Pastikan Python **3.11**
-- Wajib install `requirements.txt`
-- Database harus di-import sebelum run
-- `.env` wajib dibuat manual
-- Model ML tidak disimpan di GitHub
+Project ini dikembangkan untuk tugas **Analisis Data System (ADS)** dengan integrasi:
+
+- ⚡ FastAPI Backend
+- 🗄️ MySQL Database
+- 🤖 Machine Learning Ensemble
+- ☁️ Hugging Face Deployment
 
 ---
+
+## 📌 Future Improvements
+
+- 📊 Dashboard analytics interaktif
+- 📄 Export PDF hasil tes
+- 🔐 Role-based access control (RBAC)
+- ☁️ Deployment VPS / Docker
+- 📡 REST API documentation (Swagger enhancement)
+
+---
+
+## 🎯 Notes
+
+✔ Python 3.11 required  
+✔ Database must be imported first  
+✔ `.env` wajib dibuat manual  
+✔ Model tidak disimpan di GitHub (Hugging Face only)
+
+---
+
+<p align="center">
+  <b>🚀 SIPEKA - AI Personality Prediction System</b><br>
+  Built with FastAPI • MySQL • Machine Learning
+</p>

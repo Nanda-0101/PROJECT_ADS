@@ -1,21 +1,14 @@
-# 1. SIPEKA - Sistem Prediksi Kepribadian Mahasiswa
+# 1. SIPEKA Sistem Prediksi Kepribadian Mahasiswa
 
 <p align="center">
-  <img src="https://img.shields.io/badge/FastAPI-Backend-009688?style=for-the-badge&logo=fastapi" />
-  <img src="https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python" />
-  <img src="https://img.shields.io/badge/MySQL-Database-orange?style=for-the-badge&logo=mysql" />
-  <img src="https://img.shields.io/badge/ML-Ensemble-red?style=for-the-badge&logo=tensorflow" />
-</p>
-
-<p align="center">
-  <b>AI-Based Personality Prediction System for Students</b><br>
-  Introvert • Ekstrovert • Ambivert Classification using Machine Learning Ensemble
+  <b>Sistem Prediksi Kepribadian Mahasiswa</b><br>
+  Introvert • Ekstrovert • Ambivert Klasifikasi Menggunakan Machine Learning Ensemble
 </p>
 
 ---
 
 ## 2. Repository
-👉 https://github.com/Nanda-0101/PROJECT_ADS
+https://github.com/Nanda-0101/PROJECT_ADS
 
 ---
 
@@ -53,8 +46,6 @@ dengan backend **FastAPI** dan database **MySQL**.
 ---
 
 ## 5. Machine Learning Architecture
-
-## (Dihapus sesuai permintaan - flowchart tidak ditampilkan)
 
 ### Model Output
 - Introvert

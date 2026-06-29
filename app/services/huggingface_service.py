@@ -10,7 +10,7 @@ def predict_kepribadian(gender, age, jawaban):
             "age": age,
             "answers": jawaban
         },
-        timeout=60
+        timeout=600
     )
     
     response.raise_for_status()
